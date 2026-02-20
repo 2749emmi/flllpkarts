@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="270" viewBox="0 0 1600 270">
+  <defs>
+    <linearGradient id="bannerbg_banner1" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#2874f0"/>
+      <stop offset="100%" style="stop-color:#1a5bb5"/>
+    </linearGradient>
+  </defs>
+  <rect width="1600" height="270" fill="url(#bannerbg_banner1)"/>
+  <!-- Decorative circles -->
+  <circle cx="1400" cy="135" r="200" fill="white" opacity="0.05"/>
+  <circle cx="1350" cy="135" r="150" fill="white" opacity="0.05"/>
+  <circle cx="200" cy="300" r="150" fill="white" opacity="0.03"/>
+  <!-- Text -->
+  <text x="120" y="100" font-family="Arial, sans-serif" font-size="48" font-weight="bold" fill="white">Mega Sale</text>
+  <text x="120" y="150" font-family="Arial, sans-serif" font-size="28" fill="white" opacity="0.9">Up to 70% Off on Electronics</text>
+  <rect x="120" y="175" width="200" height="40" rx="4" fill="#FFD700"/>
+  <text x="220" y="202" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="#2874f0">CODE: FLIPDEAL</text>
+  <!-- Flipkart star -->
+  <polygon points="1450,50 1460,80 1490,80 1465,100 1475,130 1450,110 1425,130 1435,100 1410,80 1440,80" fill="#FFD700" opacity="0.3"/>
+</svg>

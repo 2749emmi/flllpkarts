@@ -1,0 +1,128 @@
+body {
+  margin: 0;
+  padding: 0;
+  background-color: rgb(241, 242, 244);
+}
+
+#nav-bar {
+  display: flex;
+  justify-content: space-around;
+  height: 75px;
+  align-items: center;
+  background-color: white;
+  font-size: large;
+}
+
+.nav-logo {
+  margin-left: 0px;
+}
+
+.nav-search {
+  height: 35px;
+  width: 500px;
+  background-color: rgb(240, 245, 255);
+}
+
+.nav-search input {
+  width: 450px;
+  height: 35px;
+  background-color: rgb(240, 245, 255);
+  border: none;
+  font-size: large;
+}
+
+.nav-login button {
+  height: 30px;
+  width: 90px;
+  border-radius: 10px;
+  font-size: large;
+  border: none;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: white;
+}
+
+.nav-login button:hover {
+  background-color:rgb(42,85,229);
+  color: white;
+  cursor: pointer;
+  padding: 5px;
+}
+
+.nav-cart button {
+  height: 30px;
+  width: 80px;
+  border-radius: 10px;
+  font-size: large;
+  border: none;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: white;
+}
+
+.nav-cart button:hover {
+    background-color:rgb(42,85,229);
+    color: white;
+  cursor: pointer;
+  padding: 5px;
+}
+
+.nav-seller a {
+  text-decoration: none;
+  color: black;
+}
+
+
+
+/* Sliding Window */
+
+#Sliding-window{
+    margin-top: 30px;
+    margin-bottom: 30px;
+}
+
+#Sliding-window marquee img{
+    height: 350px;
+}
+
+
+/* Cards */
+
+#cards{
+    margin: 30px;
+    background-color: white;
+    display: flex;
+    justify-content: space-around;
+}
+
+#cards img{
+     transition: width 2s;
+     cursor: pointer;
+     height: 200px;
+}
+
+
+#cards img:hover {
+  width: 250px;
+}
+
+
+/* Footer */
+
+#Footer{
+    background-color: black;
+    color: white;
+    text-align: center;
+}
+#Footer1{
+    display: flex;
+    justify-content: space-around;
+    background-color: black;
+    color: white;
+}
+
+#Footer1 ul{
+    list-style: none;
+}

@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="77" height="21" viewBox="0 0 77 21">
+  <rect width="77" height="21" rx="3" fill="#2874F0"/>
+  <text x="6" y="15" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="white">✓</text>
+  <text x="16" y="14" font-family="Arial, sans-serif" font-size="9" fill="white">Flipkart</text>
+  <text x="16" y="14" font-family="Arial, sans-serif" font-size="9" fill="white" font-weight="bold">Assured</text>
+  <text x="50" y="14" font-family="Arial, sans-serif" font-size="9" fill="#FFD700" font-weight="bold">Assured</text>
+</svg>

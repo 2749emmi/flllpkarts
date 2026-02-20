@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="240" height="20" viewBox="0 0 240 20">
+  <!-- Visa -->
+  <rect x="0" y="2" width="38" height="16" rx="2" fill="#1A1F71" stroke="#ddd" stroke-width="0.5"/>
+  <text x="19" y="14" text-anchor="middle" font-family="Arial" font-size="8" font-weight="bold" fill="white" font-style="italic">VISA</text>
+  <!-- Mastercard -->
+  <circle cx="57" cy="10" r="7" fill="#EB001B"/>
+  <circle cx="65" cy="10" r="7" fill="#F79E1B"/>
+  <!-- RuPay -->
+  <rect x="80" y="2" width="38" height="16" rx="2" fill="#097252" stroke="#ddd" stroke-width="0.5"/>
+  <text x="99" y="14" text-anchor="middle" font-family="Arial" font-size="7" font-weight="bold" fill="white">RuPay</text>
+  <!-- UPI -->
+  <rect x="125" y="2" width="30" height="16" rx="2" fill="#5F2596" stroke="#ddd" stroke-width="0.5"/>
+  <text x="140" y="14" text-anchor="middle" font-family="Arial" font-size="8" font-weight="bold" fill="white">UPI</text>
+  <!-- NetBanking -->
+  <rect x="162" y="2" width="38" height="16" rx="2" fill="#2196F3" stroke="#ddd" stroke-width="0.5"/>
+  <text x="181" y="13" text-anchor="middle" font-family="Arial" font-size="6" fill="white">Net</text>
+  <text x="181" y="19" text-anchor="middle" font-family="Arial" font-size="5" fill="white">Banking</text>
+  <!-- COD -->
+  <rect x="207" y="2" width="30" height="16" rx="2" fill="#4CAF50" stroke="#ddd" stroke-width="0.5"/>
+  <text x="222" y="14" text-anchor="middle" font-family="Arial" font-size="7" font-weight="bold" fill="white">COD</text>
+</svg>
