@@ -436,6 +436,154 @@ input {
   }
 }
 
+/* ==================== PRODUCT PAGE LAYOUT ==================== */
+.pdp-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 10px 0 80px;
+  width: 100%;
+}
+.pdp-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  width: 100%;
+}
+.pdp-left {
+  width: 100%;
+  background: #fff;
+}
+.pdp-right {
+  width: 100%;
+  padding: 16px 14px 24px;
+  background: #fff;
+}
+.pdp-gallery {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+.pdp-thumbs {
+  display: flex;
+  flex-direction: row;
+  gap: 6px;
+  padding: 10px 14px;
+  overflow-x: auto;
+  order: 2;
+  background: #fff;
+  border-top: 1px solid #f0f0f0;
+}
+.pdp-main-image {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1;
+  background: #fff;
+  order: 1;
+}
+.pdp-buttons-sticky {
+  display: flex;
+  gap: 0;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 40;
+  box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+  background: #fff;
+}
+.pdp-buttons-desktop {
+  display: none;
+}
+.pdp-specs-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.pdp-specs-table tr {
+  border-bottom: 1px solid #f0f0f0;
+}
+.pdp-specs-table td {
+  padding: 12px 0;
+  font-size: 14px;
+  vertical-align: top;
+}
+.pdp-specs-table td:first-child {
+  color: #878787;
+  width: 40%;
+  padding-right: 16px;
+  font-weight: 400;
+}
+.pdp-specs-table td:last-child {
+  color: #212121;
+  font-weight: 500;
+}
+
+@media (min-width: 768px) {
+  .pdp-container {
+    padding: 10px 10px 40px;
+  }
+  .pdp-layout {
+    flex-direction: row;
+    gap: 0;
+    border-radius: 0;
+  }
+  .pdp-left {
+    width: 40%;
+    max-width: 500px;
+    flex-shrink: 0;
+    position: sticky;
+    top: 64px;
+    align-self: flex-start;
+    height: auto;
+    border-right: 1px solid #f0f0f0;
+  }
+  .pdp-right {
+    flex: 1;
+    min-width: 0;
+    padding: 16px 24px 32px;
+  }
+  .pdp-gallery {
+    flex-direction: row;
+  }
+  .pdp-thumbs {
+    flex-direction: column;
+    width: 64px;
+    flex-shrink: 0;
+    padding: 6px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    max-height: 420px;
+    order: 1;
+    border-top: none;
+    border-right: 1px solid #f0f0f0;
+  }
+  .pdp-main-image {
+    flex: 1;
+    order: 2;
+    aspect-ratio: auto;
+    height: 420px;
+  }
+  .pdp-buttons-sticky {
+    display: none;
+  }
+  .pdp-buttons-desktop {
+    display: flex;
+    gap: 12px;
+    padding: 12px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .pdp-container {
+    padding: 10px 16px 40px;
+  }
+  .pdp-main-image {
+    height: 480px;
+  }
+  .pdp-thumbs {
+    max-height: 480px;
+  }
+}
+
 /* ==================== ANIMATIONS ==================== */
 @keyframes spin {
   to { transform: rotate(360deg); }
