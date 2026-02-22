@@ -4,12 +4,10 @@ const fs = require('fs');
 const path = require('path');
 const https = require('https');
 
-try { require.resolve('puppeteer-extra'); require.resolve('puppeteer-extra-plugin-stealth'); }
-catch { console.error('\n  Install deps first:\n  npm install puppeteer puppeteer-extra puppeteer-extra-plugin-stealth\n'); process.exit(1); }
+try { require.resolve('cheerio'); }
+catch { console.error('\n  Install deps first:\n  npm install cheerio\n'); process.exit(1); }
 
-const puppeteer = require('puppeteer-extra');
-const StealthPlugin = require('puppeteer-extra-plugin-stealth');
-puppeteer.use(StealthPlugin());
+const cheerio = require('cheerio');
 
 const OUTPUT_PATH = path.join(__dirname, 'scraped-product.json');
 const IMAGES_DIR = path.join(__dirname, '..', 'public', 'images', 'products');
@@ -40,98 +38,59 @@ function slugify(str) {
   return str.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').substring(0, 60);
 }
 
-async function scrapeProduct(browser, url) {
-  const page = await browser.newPage();
-  await page.setViewport({ width: 1920, height: 1080 });
-
+async function scrapeProduct(url) {
   try {
-    console.log(`  Navigating to: ${url}`);
-    await page.goto(url, { waitUntil: 'networkidle0', timeout: 60000 });
-    await delay(8000);
+    console.log(`  Fetching HTML for: ${url}`);
 
-    // Close modals
-    try {
-      const btns = await page.$$('button');
-      for (const btn of btns) {
-        const text = await page.evaluate(el => el.textContent?.trim(), btn);
-        if (text === '✕' || text === '×') { await btn.click(); break; }
+    const response = await fetch(url, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
+        'Accept-Language': 'en-US,en;q=0.9',
       }
-    } catch { }
-
-    // Scroll page to load lazy content
-    console.log('  Scrolling page...');
-    await page.evaluate(async () => {
-      for (let y = 0; y < document.body.scrollHeight; y += 400) {
-        window.scrollTo(0, y);
-        await new Promise(r => setTimeout(r, 150));
-      }
-      window.scrollTo(0, 0);
     });
-    await delay(2000);
 
-    // Click "Show More" / "All details" buttons to expand specs
-    console.log('  Expanding specs/details...');
-    try {
-      const clickable = await page.$$('button, span, div');
-      for (const el of clickable) {
-        const text = await page.evaluate(e => e.textContent?.trim(), el);
-        if (text === 'Show More' || text === 'All details' || text === 'Read More') {
-          await el.click();
-          await delay(1000);
-        }
-      }
-    } catch { }
-    await delay(2000);
-
-    // Hover thumbnails to load high-res images
-    console.log('  Hovering thumbnails...');
-    const thumbs = await page.$$('img[src*="80/110"], img[src*="80/80"]');
-    for (const thumb of thumbs) {
-      try { await thumb.hover(); await delay(400); } catch { }
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
     }
-    await delay(1000);
 
-    // Get full page text
-    const fullText = await page.evaluate(() => document.body.innerText);
+    const html = await response.text();
+    const $ = cheerio.load(html);
 
-    // Extract all image URLs
-    const productImages = await page.evaluate(() => {
-      const urls = new Set();
-      const seen = new Set();
-      document.querySelectorAll('img').forEach(img => {
-        const src = img.src || '';
-        if (src.includes('rukminim') && src.includes('/image/')) {
-          const highRes = src.replace(/\/image\/\d+\/\d+\//, '/image/832/832/');
-          const key = highRes.replace(/\?.*$/, '');
-          if (!seen.has(key) && !src.includes('/promos/') && !src.includes('/cms-') && !src.includes('/fk-p-') && !src.includes('/blobio/') && !src.includes('/www/')) {
-            seen.add(key);
-            urls.add(highRes);
-          }
+    // Images
+    const productImages = [];
+    const seenImages = new Set();
+    $('img').each((i, el) => {
+      let src = $(el).attr('src') || $(el).attr('data-url') || '';
+      if (src.includes('rukminim') && src.includes('/image/')) {
+        const highRes = src.replace(/\/image\/\d+\/\d+\//, '/image/832/832/');
+        const key = highRes.replace(/\?.*$/, '');
+        if (!seenImages.has(key) && !src.includes('/promos/') && !src.includes('/cms-') && !src.includes('/fk-p-') && !src.includes('/blobio/') && !src.includes('/www/')) {
+          seenImages.add(key);
+          productImages.push(highRes);
         }
-      });
-      return [...urls];
+      }
     });
 
-    // Parse structured data from page text
+    // Replace <br> and other block elements with newlines for innerText simulation
+    $('br').replaceWith('\n');
+    $('script, style, noscript, svg, header, footer, nav, iframe').remove();
+    $('div, p, h1, h2, h3, h4, h5, h6, li, tr').prepend('\n');
+    const fullText = $('body').text().replace(/\n+/g, '\n');
+
     const data = parsePageText(fullText, productImages);
 
     // Try to extract specs via DOM (table structure)
-    const domSpecs = await page.evaluate(() => {
-      const specs = {};
-      document.querySelectorAll('table').forEach(table => {
-        const rows = table.querySelectorAll('tr');
-        rows.forEach(row => {
-          const cells = row.querySelectorAll('td');
-          if (cells.length >= 2) {
-            const key = cells[0].textContent.trim();
-            const val = cells[cells.length - 1].textContent.trim();
-            if (key.length > 2 && key.length < 60 && val.length > 0 && val.length < 300) {
-              specs[key] = val;
-            }
-          }
-        });
-      });
-      return specs;
+    const domSpecs = {};
+    $('table tr').each((i, row) => {
+      const cells = $(row).find('td');
+      if (cells.length >= 2) {
+        const key = $(cells[0]).text().trim();
+        const val = $(cells[cells.length - 1]).text().trim();
+        if (key.length > 2 && key.length < 60 && val.length > 0 && val.length < 300) {
+          domSpecs[key] = val;
+        }
+      }
     });
 
     if (Object.keys(domSpecs).length > 0) {
@@ -139,40 +98,40 @@ async function scrapeProduct(browser, url) {
     }
 
     // Try extracting variants from the DOM (color, storage etc)
-    const domVariants = await page.evaluate(() => {
-      const variants = [];
-      // Flipkart usually puts variant sections in divs containing list items
-      document.querySelectorAll('.aMaAEs').forEach(container => {
-        const sections = container.querySelectorAll('.mMt9-n');
-        sections.forEach(sec => {
-          const labelEl = sec.querySelector('.Otb-b_');
-          if (labelEl) {
-            const label = labelEl.textContent.trim();
-            const options = [];
-            sec.querySelectorAll('ul li').forEach(li => {
-              const optText = li.textContent.trim();
-              const isAvailable = !li.classList.contains('CHzS-c');
-              if (optText) options.push({ name: optText, available: isAvailable });
-            });
-            if (options.length > 0) {
-              variants.push({ type: label, options });
-            }
-          }
-        });
+    const domVariants = [];
+    $('.InyRmc, .\\_3Z5yFS').each((i, container) => {
+      const type = $(container).find('.\\_25b18c, .\\_2fIbwP').text().trim();
+      if (!type) return;
+
+      const options = [];
+      $(container).find('li').each((j, li) => {
+        const title = $(li).attr('title') || $(li).text().trim() || $(li).find('a').text().trim() || $(li).find('.\\_4zdo').text().trim();
+        const a = $(li).find('a').first();
+        const optionUrl = a.length ? 'https://www.flipkart.com' + a.attr('href') : '';
+        const isCurrent = $(li).hasClass('RcXBOT') || $(li).hasClass('\\_3V2w15');
+
+        let imgUrl = $(li).find('img').attr('src') || '';
+        if (imgUrl && imgUrl.includes('/image/')) {
+          imgUrl = imgUrl.replace(/\/image\/\d+\/\d+\//, '/image/128/128/');
+        }
+
+        if (title && title.length > 1) {
+          options.push({ name: title, url: optionUrl, isCurrent: !!isCurrent, image: imgUrl });
+        }
       });
-      return variants;
+
+      if (options.length > 0) {
+        domVariants.push({ type, options });
+      }
     });
 
     if (domVariants.length > 0) {
       data.variants = domVariants;
     }
 
-    // Take screenshot
-    await page.screenshot({ path: path.join(__dirname, `screenshot-${slugify(data.title || 'product')}.png`) });
-
     return { ...data, sourceUrl: url, scrapedAt: new Date().toISOString() };
-  } finally {
-    await page.close();
+  } catch (err) {
+    throw err;
   }
 }
 
@@ -261,12 +220,15 @@ function parsePageText(text, images) {
   // Reviews
   const reviews = [];
   const ratingsStart = lines.indexOf('Ratings and reviews');
+  console.log(`    parsePageText: Rating Start -> ${ratingsStart}`);
   if (ratingsStart > -1) {
     let i = ratingsStart + 1;
     // Skip the summary section (rating categories)
-    while (i < lines.length && !lines[i].match(/^\d$/)) i++;
+    let safeCount1 = 0;
+    while (i < lines.length && !lines[i].match(/^\d$/) && safeCount1++ < 1000) i++;
 
-    while (i < lines.length && reviews.length < 8) {
+    let safeCount2 = 0;
+    while (i < lines.length && reviews.length < 8 && safeCount2++ < 5000) {
       if (lines[i].match(/^[1-5]$/) && i + 2 < lines.length) {
         const reviewRating = parseInt(lines[i]);
         const reviewTitle = lines[i + 1];
@@ -275,7 +237,8 @@ function parsePageText(text, images) {
           let comment = '';
           let author = 'Flipkart User';
           let j = i + 3;
-          while (j < lines.length && !lines[j].match(/^[1-5]$/) && lines[j] !== 'Show all reviews') {
+          let safeCount3 = 0;
+          while (j < lines.length && !lines[j].match(/^[1-5]$/) && lines[j] !== 'Show all reviews' && safeCount3++ < 500) {
             if (lines[j].match(/Reviewer$/) && j > 0 && lines[j - 1].match(/^[A-Z]/)) {
               author = lines[j - 1];
             } else if (!lines[j].match(/^\d+$/) && !lines[j].match(/Reviewer$/)) {
@@ -304,6 +267,7 @@ function parsePageText(text, images) {
       }
     }
   }
+  console.log(`    parsePageText: Reviews Done -> ${reviews.length}`);
 
   // Specs (from text between "Specifications" and "Warranty" / "Manufacturer info")
   const specs = {};
@@ -394,17 +358,12 @@ async function main() {
 
   console.log(`\nScraping ${urls.length} product(s)...\n`);
 
-  const browser = await puppeteer.launch({
-    headless: 'new',
-    args: ['--no-sandbox', '--disable-setuid-sandbox', '--window-size=1920,1080', '--disable-blink-features=AutomationControlled'],
-  });
-
   const results = [];
 
   for (let i = 0; i < urls.length; i++) {
     console.log(`[${i + 1}/${urls.length}] Scraping...`);
     try {
-      let data = await scrapeProduct(browser, urls[i]);
+      let data = await scrapeProduct(urls[i]);
 
       if (downloadLocal && data.images?.length) {
         console.log('  Downloading images...');
@@ -425,8 +384,6 @@ async function main() {
       await delay(3000 + Math.random() * 2000);
     }
   }
-
-  await browser.close();
 
   const output = results.length === 1 ? results[0] : results;
   fs.writeFileSync(OUTPUT_PATH, JSON.stringify(output, null, 2));
