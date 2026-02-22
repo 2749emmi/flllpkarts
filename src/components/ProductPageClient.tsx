@@ -1,5 +1,5 @@
 'use client';
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Star, Tag, Truck, Shield, RotateCcw, ShoppingCart, Zap, Heart, Share2, ThumbsUp, ThumbsDown, ChevronDown, ChevronUp, MapPin } from 'lucide-react';
@@ -31,6 +31,18 @@ export default function ProductPageClient({ product }: { product: Product }) {
   const [pincode, setPincode] = useState('');
   const [pincodeChecked, setPincodeChecked] = useState(false);
   const [goToCart, setGoToCart] = useState(false);
+  const [selectedVariants, setSelectedVariants] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    if (product.variants && product.variants.length > 0) {
+      const initial: Record<string, string> = {};
+      product.variants.forEach(v => {
+        const firstAvailable = v.options.find(o => o.available);
+        if (firstAvailable) initial[v.type] = firstAvailable.name;
+      });
+      setSelectedVariants(initial);
+    }
+  }, [product.variants]);
 
   const images = product.images?.length ? product.images : [product.image];
   const specs = product.specs || {};
@@ -282,6 +294,51 @@ export default function ProductPageClient({ product }: { product: Product }) {
                 ))}
               </div>
             </div>
+
+            {/* Variants */}
+            {product.variants && product.variants.length > 0 && (
+              <div style={{ marginBottom: '20px', paddingBottom: '20px', borderBottom: '1px solid #f0f0f0' }}>
+                {product.variants.map((v, i) => (
+                  <div key={i} style={{ display: 'flex', gap: '32px', marginBottom: '16px' }}>
+                    <span style={{ color: '#878787', fontSize: '14px', fontWeight: 500, width: '100px', flexShrink: 0, marginTop: '8px' }}>
+                      {v.type}
+                    </span>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                      {v.options.map((opt, j) => {
+                        const isSelected = selectedVariants[v.type] === opt.name;
+                        return (
+                          <div
+                            key={j}
+                            onClick={() => {
+                              if (opt.available) {
+                                setSelectedVariants(prev => ({ ...prev, [v.type]: opt.name }));
+                              }
+                            }}
+                            style={{
+                              padding: '8px 12px',
+                              border: `2px solid ${isSelected ? '#2874f0' : (opt.available ? '#e0e0e0' : '#f0f0f0')}`,
+                              borderRadius: '2px',
+                              fontSize: '14px',
+                              fontWeight: isSelected ? 600 : 400,
+                              color: opt.available ? '#212121' : '#b2b2b2',
+                              backgroundColor: opt.available ? '#fff' : '#fafafa',
+                              cursor: opt.available ? 'pointer' : 'not-allowed',
+                              position: 'relative',
+                              overflow: 'hidden'
+                            }}
+                          >
+                            {opt.name}
+                            {!opt.available && (
+                              <div style={{ position: 'absolute', top: '50%', left: '-10%', width: '120%', height: '1px', backgroundColor: '#e0e0e0', transform: 'rotate(-15deg)' }} />
+                            )}
+                          </div>
+                        )
+                      })}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
 
             {/* Highlights */}
             <div style={{ marginBottom: '20px', paddingBottom: '20px', borderBottom: '1px solid #f0f0f0' }}>

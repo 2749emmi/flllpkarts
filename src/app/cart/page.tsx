@@ -3,6 +3,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { ShoppingCart, Minus, Plus, Trash2, ShieldCheck, Truck } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
+import { getProductUrl } from '@/utils/url';
 
 export default function CartPage() {
     const { items, removeFromCart, updateQuantity, totalItems, totalPrice, clearCart } = useCart();
@@ -48,7 +49,7 @@ export default function CartPage() {
                                         display: 'flex', gap: '16px', alignItems: 'flex-start',
                                     }}>
                                         {/* Product Image */}
-                                        <Link href={`/product/${item.id}`} style={{ flexShrink: 0 }}>
+                                        <Link href={getProductUrl(item.title, item.id)} style={{ flexShrink: 0 }}>
                                             <div style={{ width: '112px', height: '112px', position: 'relative' }}>
                                                 <Image src={item.image} alt={item.title} fill style={{ objectFit: 'contain' }} sizes="112px" />
                                             </div>
@@ -56,7 +57,7 @@ export default function CartPage() {
 
                                         {/* Details */}
                                         <div style={{ flex: 1, minWidth: 0 }}>
-                                            <Link href={`/product/${item.id}`} style={{ textDecoration: 'none' }}>
+                                            <Link href={getProductUrl(item.title, item.id)} style={{ textDecoration: 'none' }}>
                                                 <p style={{ fontSize: '16px', fontWeight: 500, color: '#212121', marginBottom: '8px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                                                     {item.title}
                                                 </p>

@@ -3,6 +3,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { products, Product } from '@/data/products';
 import { useState } from 'react';
+import { getProductUrl } from '@/utils/url';
 
 const categoryFilters = [
   { label: 'All', value: null },
@@ -25,7 +26,7 @@ const sortOptions = [
 
 function ListProductCard({ product }: { product: Product }) {
   return (
-    <Link href={`/product/${product.id}`} style={{
+    <Link href={getProductUrl(product.title, product.id)} style={{
       display: 'flex', textDecoration: 'none', padding: '16px 20px',
       borderBottom: '1px solid #f0f0f0', gap: '20px',
       transition: 'box-shadow 0.15s',
@@ -98,7 +99,7 @@ function ListProductCard({ product }: { product: Product }) {
 
 function GridProductCard({ product }: { product: Product }) {
   return (
-    <Link href={`/product/${product.id}`} style={{
+    <Link href={getProductUrl(product.title, product.id)} style={{
       display: 'flex', flexDirection: 'column', backgroundColor: '#fff', padding: '8px',
       textDecoration: 'none', borderBottom: '1px solid #f0f0f0', borderRight: '1px solid #f0f0f0',
     }}>

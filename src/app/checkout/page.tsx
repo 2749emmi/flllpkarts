@@ -112,7 +112,7 @@ function UpsellCard({ product, dealPrice, added, onAdd }: {
 export default function CheckoutPage() {
   const { items, totalItems, totalPrice, clearCart, addToCart } = useCart();
   const router = useRouter();
-  const [step, setStep] = useState<Step>('address');
+  const [step, setStep] = useState<'address' | 'payment' | 'success' | 'upsell_payment'>('address');
   const [selectedMethod, setSelectedMethod] = useState('');
   const [processing, setProcessing] = useState(false);
   const [form, setForm] = useState({
@@ -124,21 +124,14 @@ export default function CheckoutPage() {
   const [lottiePreloaded, setLottiePreloaded] = useState(false);
 
   const [upsellRound, setUpsellRound] = useState(0);
-  const [upsellAdded, setUpsellAdded] = useState<string[]>([]);
   const [upsellTimer, setUpsellTimer] = useState(120);
-  const [upsellProcessing, setUpsellProcessing] = useState(false);
+  const [selectedUpsellItem, setSelectedUpsellItem] = useState<{ product: Product, dealPrice: number } | null>(null);
 
   const round1Products = round1Ids.map(id => products.find(p => p.id === id)).filter(Boolean) as Product[];
   const round2Products = round2Ids.map(id => products.find(p => p.id === id)).filter(Boolean) as Product[];
-  const currentRoundProducts = upsellRound === 0 ? round1Products : round2Products;
 
   const totalOriginalPrice = items.reduce((sum, i) => sum + i.originalPrice * i.quantity, 0);
   const totalDiscount = totalOriginalPrice - totalPrice;
-
-  const upsellTotalDealPrice = upsellAdded.reduce((sum, id) => {
-    const p = products.find(pr => pr.id === id);
-    return p ? sum + getDealPrice(p.price) : sum;
-  }, 0);
 
   useEffect(() => {
     if (step === 'success' && !orderId) {
@@ -146,46 +139,65 @@ export default function CheckoutPage() {
     }
   }, [step, orderId]);
 
+  const [completedOrderItems, setCompletedOrderItems] = useState<any[]>([]);
+
   useEffect(() => {
-    if (step !== 'success') return;
-    const iv = setInterval(() => setUpsellTimer(p => (p > 0 ? p - 1 : 0)), 1000);
+    if ((step !== 'success' && step !== 'upsell_payment') || upsellRound >= 2) return;
+    const iv = setInterval(() => setUpsellTimer(p => {
+      if (p <= 1) {
+        setUpsellRound(r => r + 1);
+        if (step === 'upsell_payment') setStep('success'); // kick out if timer dies
+        return 120;
+      }
+      return p - 1;
+    }), 1000);
     return () => clearInterval(iv);
   }, [step, upsellRound]);
 
-  const handleUpsellPay = useCallback(() => {
-    if (upsellAdded.length === 0) return;
-    setUpsellProcessing(true);
+  const [processingUpsell, setProcessingUpsell] = useState(false);
 
-    // Add selected upsell items to the main cart with the discounted deal price
-    upsellAdded.forEach(id => {
-      const product = products.find(p => p.id === id);
-      if (product) {
-        const dealPrice = getDealPrice(product.price);
-        addToCart({
-          ...product,
-          price: dealPrice,
-          originalPrice: product.price // Show original price as the pre-discount price in cart? Or keep original.
-          // Actually, let's keep originalPrice as originalPrice, and price as dealPrice.
-        });
-      }
-    });
+  // Triggered when "Add" is clicked on the Upsell card
+  const handleInitiateUpsellPurchase = useCallback((product: Product) => {
+    const dealPrice = getDealPrice(product.price);
+    setSelectedUpsellItem({ product, dealPrice });
+    setStep('upsell_payment');
+    window.scrollTo(0, 0);
+  }, []);
+
+  // Triggered when "Pay X" is clicked on the upsell payment screen
+  const handleFinalizeUpsellPurchase = useCallback(() => {
+    if (!selectedUpsellItem) return;
+    setProcessingUpsell(true);
+    setStep('success');
+    window.scrollTo(0, 0);
 
     setTimeout(() => {
-      setUpsellProcessing(false);
-      setUpsellAdded([]);
-      setUpsellTimer(120);
-      setUpsellRound(0); // Reset round logic
-      setStep('address'); // Restart checkout
-      window.scrollTo(0, 0);
+      setCompletedOrderItems(prev => {
+        if (prev.some(item => item.id === selectedUpsellItem.product.id)) return prev;
+        return [
+          ...prev,
+          {
+            ...selectedUpsellItem.product,
+            price: selectedUpsellItem.dealPrice,
+            originalPrice: selectedUpsellItem.product.price,
+            quantity: 1
+          }
+        ];
+      });
+      setProcessingUpsell(false);
+      setSelectedUpsellItem(null);
     }, 1500);
-  }, [upsellAdded, addToCart]);
+  }, [selectedUpsellItem]);
 
-  if (items.length === 0 && step !== 'success') {
+  if (items.length === 0 && step !== 'success' && step !== 'upsell_payment' && !processingUpsell) {
     return (
-      <div style={{
-        minHeight: '80vh', display: 'flex', flexDirection: 'column',
-        alignItems: 'center', justifyContent: 'center', backgroundColor: '#f1f3f6', padding: '20px',
-      }}>
+      <div
+        suppressHydrationWarning
+        style={{
+          minHeight: '80vh', display: 'flex', flexDirection: 'column',
+          alignItems: 'center', justifyContent: 'center', backgroundColor: '#f1f3f6', padding: '20px',
+        }}
+      >
         <Package size={64} color="#e0e0e0" strokeWidth={1} />
         <h2 style={{ fontSize: '18px', fontWeight: 600, color: '#212121', marginTop: '16px' }}>
           No items to checkout
@@ -215,12 +227,13 @@ export default function CheckoutPage() {
   const handleProceedToPayment = () => {
     if (validateForm()) setStep('payment');
   };
-
   const handleConfirmOrder = () => {
     if (!selectedMethod) return;
     setProcessing(true);
     setSavedDiscount(totalDiscount);
     setLottiePreloaded(true);
+    // Snapshot items before clearing cart
+    setCompletedOrderItems([...items]);
     setTimeout(() => {
       clearCart();
       setStep('success');
@@ -229,7 +242,94 @@ export default function CheckoutPage() {
     }, 1500);
   };
 
-  if (step === 'success') {
+  if (step === 'upsell_payment' && selectedUpsellItem) {
+    const { product, dealPrice } = selectedUpsellItem;
+    return (
+      <div suppressHydrationWarning style={{ padding: '20px 0', backgroundColor: '#f1f3f6', minHeight: '100vh' }}>
+        <div style={{ maxWidth: '800px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+
+          <div style={{ backgroundColor: '#fff', padding: '20px', borderRadius: '4px', boxShadow: '0 1px 2px 0 rgba(0,0,0,0.1)' }}>
+            <h2 style={{ fontSize: '18px', fontWeight: 600, color: '#212121', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span style={{ backgroundColor: '#2874f0', color: '#fff', width: '24px', height: '24px', borderRadius: '2px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px' }}>3</span>
+              Complete Payment
+            </h2>
+
+            {/* Upsell Item Summary */}
+            <div style={{ display: 'flex', gap: '16px', padding: '16px', border: '1px solid #f0f0f0', borderRadius: '4px', marginBottom: '20px' }}>
+              <div style={{ width: '80px', height: '80px', position: 'relative', flexShrink: 0 }}>
+                <Image src={product.image} alt={product.title} fill style={{ objectFit: 'contain' }} sizes="80px" />
+              </div>
+              <div style={{ flex: 1 }}>
+                <p style={{ fontSize: '16px', color: '#212121', margin: '0 0 8px', fontWeight: 500 }}>{product.title}</p>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <span style={{ fontSize: '20px', fontWeight: 600, color: '#212121' }}>₹{dealPrice.toLocaleString('en-IN')}</span>
+                  <span style={{ fontSize: '14px', color: '#878787', textDecoration: 'line-through' }}>₹{product.price.toLocaleString('en-IN')}</span>
+                  <span style={{ fontSize: '13px', color: '#388e3c', fontWeight: 600 }}>99% off</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Payment Options (Mock) */}
+            <div style={{ marginBottom: '24px' }}>
+              <p style={{ fontSize: '14px', fontWeight: 600, color: '#212121', marginBottom: '12px' }}>Select Payment Method for this item</p>
+
+              <label style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '16px', border: '1px solid #e0e0e0', borderRadius: '4px', cursor: 'pointer', marginBottom: '12px', backgroundColor: selectedMethod === 'upi' ? '#f5faff' : '#fff' }}>
+                <input type="radio" name="upsell_payment" value="upi" checked={selectedMethod === 'upi'} onChange={() => setSelectedMethod('upi')} style={{ width: '16px', height: '16px', accentColor: '#2874f0' }} />
+                <span style={{ fontSize: '14px', color: '#212121' }}>UPI (Google Pay, PhonePe, Paytm)</span>
+              </label>
+
+              <label style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '16px', border: '1px solid #e0e0e0', borderRadius: '4px', cursor: 'pointer', backgroundColor: selectedMethod === 'card' ? '#f5faff' : '#fff' }}>
+                <input type="radio" name="upsell_payment" value="card" checked={selectedMethod === 'card'} onChange={() => setSelectedMethod('card')} style={{ width: '16px', height: '16px', accentColor: '#2874f0' }} />
+                <span style={{ fontSize: '14px', color: '#212121' }}>Credit / Debit / ATM Card</span>
+              </label>
+            </div>
+
+            <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '16px', borderTop: '1px solid #f0f0f0', paddingTop: '16px' }}>
+              <button
+                onClick={() => setStep('success')} // cancel just goes back
+                style={{ background: 'none', border: 'none', color: '#212121', fontSize: '14px', fontWeight: 600, cursor: 'pointer', padding: '12px 24px' }}
+                disabled={processingUpsell}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleFinalizeUpsellPurchase}
+                disabled={!selectedMethod || processingUpsell}
+                style={{
+                  backgroundColor: selectedMethod ? '#fb641b' : '#e0e0e0',
+                  color: '#fff', border: 'none', padding: '14px 32px', borderRadius: '2px',
+                  fontSize: '16px', fontWeight: 600, cursor: selectedMethod ? 'pointer' : 'not-allowed',
+                  boxShadow: selectedMethod ? '0 1px 2px 0 rgba(0,0,0,.2)' : 'none',
+                  minWidth: '200px'
+                }}
+              >
+                {processingUpsell ? 'Processing...' : `Pay ₹${dealPrice.toLocaleString('en-IN')}`}
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (step === 'success' || processingUpsell) {
+    if (processingUpsell) {
+      return (
+        <div style={{
+          minHeight: '100vh', backgroundColor: '#f1f3f6',
+          display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '16px',
+        }}>
+          <div style={{
+            width: '48px', height: '48px', border: '4px solid #e0e0e0', borderTopColor: '#388e3c',
+            borderRadius: '50%', animation: 'spin-slow 0.8s linear infinite',
+          }} />
+          <p style={{ fontSize: '16px', fontWeight: 600, color: '#212121' }}>Securing Your Deal...</p>
+          <p style={{ fontSize: '13px', color: '#878787' }}>Adding flagged items to order {orderId}</p>
+          <style>{`@keyframes spin-slow { to { transform: rotate(360deg); } }`}</style>
+        </div>
+      );
+    }
+
     const timerMin = Math.floor(upsellTimer / 60);
     const timerSec = upsellTimer % 60;
     const timerStr = `${timerMin}:${timerSec < 10 ? '0' : ''}${timerSec}`;
@@ -241,25 +341,22 @@ export default function CheckoutPage() {
       ? <>Flagships starting at just <span style={{ fontWeight: 700, color: '#388e3c' }}>₹99</span> — ships with your current order:</>
       : <>Complete your Apple ecosystem at <span style={{ fontWeight: 700, color: '#388e3c' }}>unbelievable prices</span> — last chance:</>
 
-    if (upsellProcessing) {
-      return (
-        <div style={{
-          minHeight: '100vh', backgroundColor: '#f1f3f6',
-          display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '16px',
-        }}>
-          <div style={{
-            width: '48px', height: '48px', border: '4px solid #e0e0e0', borderTopColor: '#2874f0',
-            borderRadius: '50%', animation: 'spin-slow 0.8s linear infinite',
-          }} />
-          <p style={{ fontSize: '16px', fontWeight: 600, color: '#212121' }}>Processing Payment...</p>
-          <p style={{ fontSize: '13px', color: '#878787' }}>Adding items to your order</p>
-          <style>{`@keyframes spin-slow { to { transform: rotate(360deg); } }`}</style>
-        </div>
-      );
+    const currentRoundProducts = (upsellRound === 0 ? round1Products : round2Products)
+      .filter(p => !completedOrderItems.some(ci => ci.id === p.id));
+
+    // If all products in this round are added, fast forward to next round or end
+    if (currentRoundProducts.length === 0 && !isLastRound && step === 'success') {
+      setTimeout(() => {
+        setUpsellRound(p => p + 1);
+        setUpsellTimer(120);
+      }, 500);
     }
 
     return (
-      <div style={{ minHeight: '100vh', backgroundColor: '#f1f3f6', padding: '16px 10px 40px' }}>
+      <div
+        suppressHydrationWarning
+        style={{ minHeight: '100vh', backgroundColor: '#f1f3f6', padding: '16px 10px 40px' }}
+      >
         <div style={{ maxWidth: '700px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '10px' }}>
 
           {/* Order Success Card */}
@@ -276,6 +373,15 @@ export default function CheckoutPage() {
             </div>
             {upsellRound === 0 ? (
               <>
+                <div style={{ marginBottom: '16px' }}>
+                  <Link href="/" style={{
+                    display: 'inline-block',
+                    backgroundColor: '#2874f0', color: '#fff',
+                    padding: '8px 24px', borderRadius: '2px', textDecoration: 'none', fontWeight: 600, fontSize: '14px',
+                  }}>
+                    Continue Shopping
+                  </Link>
+                </div>
                 <h2 style={{ fontSize: '20px', fontWeight: 700, color: '#212121', margin: '8px 0 0' }}>
                   Order Placed Successfully!
                 </h2>
@@ -285,14 +391,6 @@ export default function CheckoutPage() {
                 <p style={{ fontSize: '13px', color: '#878787', marginTop: '2px' }}>
                   We&apos;ll send updates to your phone &amp; email
                 </p>
-                <div style={{
-                  margin: '16px auto 0', padding: '10px 20px', backgroundColor: '#f5fff5',
-                  border: '1px solid #e8f5e9', display: 'inline-block',
-                }}>
-                  <span style={{ fontSize: '14px', color: '#388e3c', fontWeight: 600 }}>
-                    You saved ₹{savedDiscount.toLocaleString('en-IN')} on this order
-                  </span>
-                </div>
               </>
             ) : (
               <>
@@ -310,7 +408,52 @@ export default function CheckoutPage() {
                     Your deals are locked in — arriving soon!
                   </span>
                 </div>
+                <p style={{ fontSize: '14px', color: '#212121', marginTop: '12px' }}>
+                  Your complete order will arrive within 3-5 business days
+                </p>
+                <div style={{ marginTop: '16px' }}>
+                  <Link href="/" style={{
+                    display: 'inline-block',
+                    backgroundColor: '#2874f0', color: '#fff',
+                    padding: '8px 24px', borderRadius: '2px', textDecoration: 'none', fontWeight: 600, fontSize: '14px',
+                  }}>
+                    Continue Shopping
+                  </Link>
+                </div>
               </>
+            )}
+
+            {/* Ordered Items List */}
+            <div style={{ marginTop: '24px', textAlign: 'left', borderTop: '1px solid #f0f0f0', paddingTop: '16px' }}>
+              <p style={{ fontSize: '14px', fontWeight: 600, color: '#212121', marginBottom: '12px' }}>Items in this order:</p>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                {completedOrderItems.map((item, i) => (
+                  <div key={i} style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+                    <div style={{ width: '50px', height: '50px', position: 'relative', flexShrink: 0, border: '1px solid #f0f0f0', borderRadius: '4px', overflow: 'hidden' }}>
+                      <Image src={item.image} alt={item.title} fill style={{ objectFit: 'contain' }} sizes="50px" />
+                    </div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <p style={{ fontSize: '13px', color: '#212121', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        {item.title}
+                      </p>
+                      <p style={{ fontSize: '12px', color: '#878787', margin: '2px 0 0' }}>
+                        Qty: {item.quantity} | ₹{item.price.toLocaleString('en-IN')}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {upsellRound === 0 && (
+              <div style={{
+                margin: '20px auto 0', padding: '10px 20px', backgroundColor: '#f5fff5',
+                border: '1px solid #e8f5e9', display: 'inline-block',
+              }}>
+                <span style={{ fontSize: '14px', color: '#388e3c', fontWeight: 600 }}>
+                  You saved ₹{savedDiscount.toLocaleString('en-IN')} on this order
+                </span>
+              </div>
             )}
           </div>
 
@@ -365,14 +508,13 @@ export default function CheckoutPage() {
 
                 {currentRoundProducts.map(p => {
                   const dealPrice = getDealPrice(p.price);
-                  const added = upsellAdded.includes(p.id);
                   return (
                     <UpsellCard
                       key={p.id}
                       product={p}
                       dealPrice={dealPrice}
-                      added={added}
-                      onAdd={() => setUpsellAdded(prev => [...prev, p.id])}
+                      added={false} // never shows added because it disappears
+                      onAdd={() => handleInitiateUpsellPurchase(p)}
                     />
                   );
                 })}
@@ -392,31 +534,15 @@ export default function CheckoutPage() {
               {/* Bottom action */}
               <div style={{
                 padding: '14px 20px', borderTop: '1px solid #e0e0e0',
-                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                display: 'flex', alignItems: 'center', justifyContent: 'end',
                 backgroundColor: '#fafafa',
               }}>
                 <Link href="/" style={{
-                  fontSize: '12px', color: '#878787', textDecoration: 'none',
+                  backgroundColor: '#2874f0', color: '#fff', padding: '10px 24px',
+                  borderRadius: '2px', fontSize: '14px', fontWeight: 600, textDecoration: 'none',
                 }}>
-                  Skip, continue to homepage
+                  Continue Shopping
                 </Link>
-                {upsellAdded.length > 0 ? (
-                  <button onClick={handleUpsellPay} style={{
-                    backgroundColor: '#fb641b', color: '#fff', padding: '10px 24px',
-                    borderRadius: '2px', fontSize: '14px', fontWeight: 600,
-                    border: 'none', cursor: 'pointer', fontFamily: 'inherit',
-                    display: 'flex', alignItems: 'center', gap: '6px',
-                  }}>
-                    <CreditCard size={16} /> Pay ₹{upsellTotalDealPrice.toLocaleString('en-IN')} Now
-                  </button>
-                ) : (
-                  <Link href="/" style={{
-                    backgroundColor: '#2874f0', color: '#fff', padding: '10px 24px',
-                    borderRadius: '2px', fontSize: '14px', fontWeight: 600, textDecoration: 'none',
-                  }}>
-                    Continue Shopping
-                  </Link>
-                )}
               </div>
             </div>
           )}

@@ -76,10 +76,31 @@ async function scrapeFlipkartProduct(page, url) {
                 }
             });
 
+            // Extract Variants
+            const variants = [];
+            document.querySelectorAll('.aMaAEs').forEach(container => {
+                const sections = container.querySelectorAll('.mMt9-n');
+                sections.forEach(sec => {
+                    const labelEl = sec.querySelector('.Otb-b_');
+                    if (labelEl) {
+                        const label = labelEl.textContent.trim();
+                        const options = [];
+                        sec.querySelectorAll('ul li').forEach(li => {
+                            const optText = li.textContent.trim();
+                            const isAvailable = !li.classList.contains('CHzS-c');
+                            if (optText) options.push({ name: optText, available: isAvailable });
+                        });
+                        if (options.length > 0) {
+                            variants.push({ type: label, options });
+                        }
+                    }
+                });
+            });
+
             return {
                 title, priceText, originalPriceText, discountText,
                 rating, ratingCount, reviewCount, description,
-                images: images.filter(Boolean), specs, highlights, reviews
+                images: images.filter(Boolean), specs, highlights, reviews, variants
             };
         });
 

@@ -3,6 +3,7 @@ import { useState, useEffect, useCallback } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Trash2, Plus, RefreshCw, ExternalLink, Search, Package, AlertCircle, CheckCircle, Loader2, Edit3, X, ChevronDown, ChevronUp } from 'lucide-react';
+import { getProductUrl } from '@/utils/url';
 
 interface Product {
   id: string;
@@ -24,6 +25,7 @@ interface Product {
   brand?: string;
   seller?: string;
   sourceUrl?: string;
+  variants?: { type: string; options: { name: string; available: boolean }[] }[];
 }
 
 type ScrapeStatus = 'idle' | 'scraping' | 'scraped' | 'error';
@@ -264,7 +266,7 @@ export default function AdminPage() {
                       </div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
                         <span style={{ fontSize: '11px', color: '#878787' }}>{(p.images?.length || 1)} imgs</span>
-                        <Link href={`/product/${p.id}`} onClick={e => e.stopPropagation()} style={{ color: '#2874f0' }}>
+                        <Link href={getProductUrl(p.title, p.id)} onClick={e => e.stopPropagation()} style={{ color: '#2874f0' }}>
                           <ExternalLink style={{ width: '16px', height: '16px' }} />
                         </Link>
                         {expandedId === p.id ? <ChevronUp style={{ width: '16px', height: '16px', color: '#878787' }} /> : <ChevronDown style={{ width: '16px', height: '16px', color: '#878787' }} />}
@@ -426,6 +428,33 @@ export default function AdminPage() {
                     <ul style={{ margin: '4px 0 0', paddingLeft: '16px', fontSize: '13px', color: '#212121' }}>
                       {scrapedProduct.highlights.map((h, i) => <li key={i}>{h}</li>)}
                     </ul>
+                  </div>
+                )}
+
+                {scrapedProduct.variants && scrapedProduct.variants.length > 0 && (
+                  <div style={{ marginBottom: '16px' }}>
+                    <strong style={{ fontSize: '13px' }}>Available Variants:</strong>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '8px' }}>
+                      {scrapedProduct.variants.map((v, i) => (
+                        <div key={i} style={{ fontSize: '13px' }}>
+                          <span style={{ color: '#878787', marginRight: '8px' }}>{v.type}:</span>
+                          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginTop: '4px' }}>
+                            {v.options.map((opt, j) => (
+                              <span key={j} style={{
+                                padding: '4px 8px',
+                                border: '1px solid #e0e0e0',
+                                borderRadius: '4px',
+                                backgroundColor: opt.available ? '#fff' : '#f5f5f5',
+                                color: opt.available ? '#212121' : '#878787',
+                                textDecoration: opt.available ? 'none' : 'line-through'
+                              }}>
+                                {opt.name}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 )}
               </div>

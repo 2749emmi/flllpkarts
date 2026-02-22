@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { products } from '@/data/products';
+import { getProductUrl } from '@/utils/url';
 
 const categoryNames: Record<string, string> = {
     mobiles: 'Mobiles',
@@ -130,7 +131,7 @@ export default async function CategoryPage({ params }: { params: Promise<{ slug:
                                 {filtered.map((product) => (
                                     <Link
                                         key={product.id}
-                                        href={`/product/${product.id}`}
+                                        href={getProductUrl(product.title, product.id)}
                                         style={{
                                             display: 'flex',
                                             flexDirection: 'column',

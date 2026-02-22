@@ -30,6 +30,7 @@ export interface Product {
     reviews?: Review[];
     brand?: string;
     seller?: string;
+    variants?: { type: string; options: { name: string; available: boolean }[] }[];
 }
 
 export const products: Product[] = productsData as unknown as Product[];

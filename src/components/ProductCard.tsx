@@ -15,6 +15,8 @@ interface ProductProps {
   rating: number;
 }
 
+import { getProductUrl } from '@/utils/url';
+
 const ProductCard = ({ id, title, price, originalPrice, discount, image, rating }: ProductProps) => {
   const { addToCart } = useCart();
 
@@ -26,7 +28,7 @@ const ProductCard = ({ id, title, price, originalPrice, discount, image, rating 
 
   return (
     <Link
-      href={`/product/${id}`}
+      href={getProductUrl(title, id)}
       style={{
         display: 'flex',
         flexDirection: 'column',

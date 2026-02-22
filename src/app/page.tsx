@@ -4,6 +4,7 @@ import Image from 'next/image';
 import CategoryBar from '@/components/CategoryBar';
 import HeroCarousel from '@/components/HeroCarousel';
 import { products } from '@/data/products';
+import { getProductUrl } from '@/utils/url';
 import { ChevronRight, ChevronLeft } from 'lucide-react';
 import { useRef, useEffect, useState } from 'react';
 
@@ -111,7 +112,7 @@ function DealRow({
             display: 'flex', overflowX: 'auto',
           }}>
             {sectionProducts.map((product, i) => (
-              <Link href={`/product/${product.id}`} key={product.id} style={{
+              <Link href={getProductUrl(product.title, product.id)} key={product.id} style={{
                 flexShrink: 0,
                 width: '188px',
                 padding: '20px 16px 16px',
@@ -270,7 +271,7 @@ function DealsOfTheDay() {
         <div className="deal-row-scroll" style={{ position: 'relative', overflow: 'hidden' }}>
           <div ref={scrollRef} className="hide-scrollbar" style={{ display: 'flex', overflowX: 'auto' }}>
             {topDeals.map((product, i) => (
-              <Link href={`/product/${product.id}`} key={product.id} style={{
+              <Link href={getProductUrl(product.title, product.id)} key={product.id} style={{
                 flexShrink: 0, width: '188px', padding: '20px 16px 16px', textDecoration: 'none',
                 display: 'flex', flexDirection: 'column', alignItems: 'center',
                 borderRight: i < topDeals.length - 1 ? '1px solid #e0e0e0' : 'none',
@@ -368,7 +369,7 @@ function SuggestedGrid() {
         <div className="deal-row-scroll" style={{ position: 'relative', overflow: 'hidden' }}>
           <div ref={scrollRef} className="hide-scrollbar" style={{ display: 'flex', overflowX: 'auto' }}>
             {items.map((product, i) => (
-              <Link href={`/product/${product.id}`} key={product.id} style={{
+              <Link href={getProductUrl(product.title, product.id)} key={product.id} style={{
                 flexShrink: 0, width: '188px', padding: '20px 16px 16px', textDecoration: 'none',
                 display: 'flex', flexDirection: 'column', alignItems: 'center',
                 borderRight: i < items.length - 1 ? '1px solid #e0e0e0' : 'none',

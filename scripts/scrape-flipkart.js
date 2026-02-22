@@ -32,7 +32,7 @@ function downloadImage(url, destPath) {
       }
       res.pipe(file);
       file.on('finish', () => { file.close(); resolve(destPath); });
-    }).on('error', err => { file.close(); try { fs.unlinkSync(destPath); } catch {} reject(err); });
+    }).on('error', err => { file.close(); try { fs.unlinkSync(destPath); } catch { } reject(err); });
   });
 }
 
@@ -56,7 +56,7 @@ async function scrapeProduct(browser, url) {
         const text = await page.evaluate(el => el.textContent?.trim(), btn);
         if (text === '✕' || text === '×') { await btn.click(); break; }
       }
-    } catch {}
+    } catch { }
 
     // Scroll page to load lazy content
     console.log('  Scrolling page...');
@@ -80,14 +80,14 @@ async function scrapeProduct(browser, url) {
           await delay(1000);
         }
       }
-    } catch {}
+    } catch { }
     await delay(2000);
 
     // Hover thumbnails to load high-res images
     console.log('  Hovering thumbnails...');
     const thumbs = await page.$$('img[src*="80/110"], img[src*="80/80"]');
     for (const thumb of thumbs) {
-      try { await thumb.hover(); await delay(400); } catch {}
+      try { await thumb.hover(); await delay(400); } catch { }
     }
     await delay(1000);
 
@@ -136,6 +136,35 @@ async function scrapeProduct(browser, url) {
 
     if (Object.keys(domSpecs).length > 0) {
       data.specs = { ...data.specs, ...domSpecs };
+    }
+
+    // Try extracting variants from the DOM (color, storage etc)
+    const domVariants = await page.evaluate(() => {
+      const variants = [];
+      // Flipkart usually puts variant sections in divs containing list items
+      document.querySelectorAll('.aMaAEs').forEach(container => {
+        const sections = container.querySelectorAll('.mMt9-n');
+        sections.forEach(sec => {
+          const labelEl = sec.querySelector('.Otb-b_');
+          if (labelEl) {
+            const label = labelEl.textContent.trim();
+            const options = [];
+            sec.querySelectorAll('ul li').forEach(li => {
+              const optText = li.textContent.trim();
+              const isAvailable = !li.classList.contains('CHzS-c');
+              if (optText) options.push({ name: optText, available: isAvailable });
+            });
+            if (options.length > 0) {
+              variants.push({ type: label, options });
+            }
+          }
+        });
+      });
+      return variants;
+    });
+
+    if (domVariants.length > 0) {
+      data.variants = domVariants;
     }
 
     // Take screenshot
@@ -235,7 +264,7 @@ function parsePageText(text, images) {
   if (ratingsStart > -1) {
     let i = ratingsStart + 1;
     // Skip the summary section (rating categories)
-    while (i < lines.length && !lines[i].match(/^\d$/) ) i++;
+    while (i < lines.length && !lines[i].match(/^\d$/)) i++;
 
     while (i < lines.length && reviews.length < 8) {
       if (lines[i].match(/^[1-5]$/) && i + 2 < lines.length) {
@@ -286,8 +315,8 @@ function parsePageText(text, images) {
       const key = specLines[i];
       const val = specLines[i + 1];
       if (key.length > 2 && key.length < 60 && val && val.length > 0 && val.length < 300 &&
-          key !== 'Show More' && key !== 'Show Less' && !key.match(/^[A-Z][a-z]+ [A-Z][a-z]+$/) &&
-          !val.match(/^(Show More|Show Less)$/)) {
+        key !== 'Show More' && key !== 'Show Less' && !key.match(/^[A-Z][a-z]+ [A-Z][a-z]+$/) &&
+        !val.match(/^(Show More|Show Less)$/)) {
         specs[key] = val;
         i++;
       }

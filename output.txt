@@ -1,0 +1,96 @@
+Starting high-speed deep scrape of Flipkart search categories...
+
+
+--- Fetching real Flipkart items for: apple iphone 15 pro max ---
+Searching: https://www.flipkart.com/search?q=apple%20iphone%2015%20pro%20max
+Found 0 real products.
+
+Processed 0 items from apple iphone 15 pro max
+
+--- Fetching real Flipkart items for: samsung galaxy s24 ultra ---
+Searching: https://www.flipkart.com/search?q=samsung%20galaxy%20s24%20ultra
+Found 0 real products.
+
+Processed 0 items from samsung galaxy s24 ultra
+
+--- Fetching real Flipkart items for: macbook pro m3 ---
+Searching: https://www.flipkart.com/search?q=macbook%20pro%20m3
+Found 0 real products.
+
+Processed 0 items from macbook pro m3
+
+--- Fetching real Flipkart items for: sony playstation 5 ---
+Searching: https://www.flipkart.com/search?q=sony%20playstation%205
+Found 0 real products.
+
+Processed 0 items from sony playstation 5
+
+--- Fetching real Flipkart items for: apple airpods pro ---
+Searching: https://www.flipkart.com/search?q=apple%20airpods%20pro
+Found 0 real products.
+
+Processed 0 items from apple airpods pro
+
+--- Fetching real Flipkart items for: apple ipad pro 12.9 ---
+Searching: https://www.flipkart.com/search?q=apple%20ipad%20pro%2012.9
+Found 0 real products.
+
+Processed 0 items from apple ipad pro 12.9
+
+--- Fetching real Flipkart items for: apple watch ultra 2 ---
+Searching: https://www.flipkart.com/search?q=apple%20watch%20ultra%202
+Found 0 real products.
+
+Processed 0 items from apple watch ultra 2
+
+--- Fetching real Flipkart items for: dji drone camera ---
+Searching: https://www.flipkart.com/search?q=dji%20drone%20camera
+Found 0 real products.
+
+Processed 0 items from dji drone camera
+
+--- Fetching real Flipkart items for: samsung galaxy z fold 5 ---
+Searching: https://www.flipkart.com/search?q=samsung%20galaxy%20z%20fold%205
+Found 0 real products.
+
+Processed 0 items from samsung galaxy z fold 5
+
+--- Fetching real Flipkart items for: google pixel 8 pro ---
+Searching: https://www.flipkart.com/search?q=google%20pixel%208%20pro
+Found 0 real products.
+
+Processed 0 items from google pixel 8 pro
+
+--- Fetching real Flipkart items for: samsung s23 ultra ---
+Searching: https://www.flipkart.com/search?q=samsung%20s23%20ultra
+Found 0 real products.
+
+Processed 0 items from samsung s23 ultra
+
+--- Fetching real Flipkart items for: iphone 13 ---
+Searching: https://www.flipkart.com/search?q=iphone%2013
+Found 0 real products.
+
+Processed 0 items from iphone 13
+
+--- Fetching real Flipkart items for: asus rog strix laptop ---
+Searching: https://www.flipkart.com/search?q=asus%20rog%20strix%20laptop
+Found 0 real products.
+
+Processed 0 items from asus rog strix laptop
+
+--- Fetching real Flipkart items for: alienware gaming laptop ---
+Searching: https://www.flipkart.com/search?q=alienware%20gaming%20laptop
+Found 0 real products.
+
+Processed 0 items from alienware gaming laptop
+
+--- Fetching real Flipkart items for: apple iphone 14 plus ---
+Searching: https://www.flipkart.com/search?q=apple%20iphone%2014%20plus
+Found 0 real products.
+
+Processed 0 items from apple iphone 14 plus
+
+
+Successfully scraped and processed 0 REAL Flipkart products.
+Database updated. Total products: 7

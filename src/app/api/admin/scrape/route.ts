@@ -57,6 +57,7 @@ export async function POST(req: NextRequest) {
         brand: product.brand || '',
         seller: product.seller || '',
         category: product.category || 'general',
+        variants: product.variants || [],
         reviews: (product.reviews || []).slice(0, 5),
         sourceUrl: url,
       },

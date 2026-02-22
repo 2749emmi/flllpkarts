@@ -10,6 +10,9 @@ const roboto = Roboto({ subsets: ['latin'], weight: ['400', '500', '700'] });
 export const metadata: Metadata = {
   title: 'Online Shopping Site for Mobiles, Electronics, Furniture, Grocery, Lifestyle, Books & More. Best Offers!',
   description: 'Shop for electronics, apparels & more using our Flipkart app Free shipping & COD.',
+  other: {
+    'darkreader-lock': 'true'
+  }
 };
 
 export const viewport: Viewport = {
@@ -25,8 +28,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
-      <body className={roboto.className} style={{ margin: 0, padding: 0 }}>
+    <html lang="en" suppressHydrationWarning>
+      <body className={roboto.className} style={{ margin: 0, padding: 0 }} suppressHydrationWarning>
         <CartProvider>
           <Navbar />
           <main style={{ minHeight: '100vh', backgroundColor: '#f1f3f6' }}>
