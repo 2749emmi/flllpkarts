@@ -112,7 +112,7 @@ function DealRow({
             display: 'flex', overflowX: 'auto',
           }}>
             {sectionProducts.map((product, i) => (
-              <Link href={getProductUrl(product.title, product.id)} key={product.id} style={{
+              <Link href={getProductUrl(product.title, product.id)} key={`${product.id}-${i}`} style={{
                 flexShrink: 0,
                 width: '188px',
                 padding: '20px 16px 16px',

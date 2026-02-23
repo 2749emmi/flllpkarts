@@ -29,3 +29,15 @@
  GET / 200 in 21ms (compile: 4ms, render: 17ms)
  GET / 200 in 24ms (compile: 4ms, render: 21ms)
  GET /api/search?q=sam 200 in 16ms (compile: 3ms, render: 13ms)
+ GET /apple-iphone-17-pro-max-desert-titanium-512-gb/p/1001 200 in 1058ms (compile: 919ms, render: 139ms)
+ GET /apple-iphone-17-pro-max-desert-titanium-512-gb/p/1001 200 in 77ms (compile: 40ms, render: 37ms)
+ GET /api/search?q= 200 in 15ms (compile: 3ms, render: 13ms)
+ GET /checkout 200 in 516ms (compile: 319ms, render: 198ms)
+ GET /api/search?q= 200 in 10ms (compile: 1848µs, render: 8ms)
+ GET / 200 in 26ms (compile: 4ms, render: 21ms)
+ GET / 200 in 12ms (compile: 2ms, render: 10ms)
+✓ Compiled in 896ms
+ GET /images/products/apple-airpods-pro-2nd-gen-1.jpeg 404 in 218ms (compile: 14ms, render: 204ms)
+ GET /images/products/google-pixel-8-pro-1.jpeg 404 in 247ms (compile: 63ms, render: 184ms)
+⨯ The requested resource isn't a valid image for /images/products/google-pixel-8-pro-1.jpeg received null
+⨯ The requested resource isn't a valid image for /images/products/apple-airpods-pro-2nd-gen-1.jpeg received null
