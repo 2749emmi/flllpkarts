@@ -2,12 +2,59 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { Search, ShoppingCart, User, ChevronDown, Store, Menu, X } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useCart } from '@/context/CartContext';
+import { useRouter } from 'next/navigation';
 
 const Navbar = () => {
+  const router = useRouter();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { totalItems } = useCart();
+
+  // Search State
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [showDropdown, setShowDropdown] = useState(false);
+  const searchRef = useRef<HTMLDivElement>(null);
+
+  // Close dropdown on outside click
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
+        setShowDropdown(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [searchRef]);
+
+  // Handle live search
+  useEffect(() => {
+    const fetchResults = async () => {
+      if (searchQuery.trim().length < 2) {
+        setSearchResults([]);
+        return;
+      }
+      try {
+        const res = await fetch(`/api/search?q=${encodeURIComponent(searchQuery)}`);
+        const data = await res.json();
+        setSearchResults(data.results || []);
+      } catch (e) {
+        console.error("Search failed", e);
+      }
+    };
+
+    const timeoutId = setTimeout(fetchResults, 300); // 300ms debounce
+    return () => clearTimeout(timeoutId);
+  }, [searchQuery]);
+
+  const handleSearchSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      setShowDropdown(false);
+      router.push(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
+    }
+  };
 
   return (
     <header style={{ position: 'sticky', top: 0, zIndex: 50 }}>
@@ -43,26 +90,81 @@ const Navbar = () => {
             </Link>
 
             {/* Search Bar */}
-            <div style={{ flex: 1, maxWidth: '560px' }}>
-              <div style={{
-                display: 'flex', alignItems: 'center', backgroundColor: '#fff',
-                borderRadius: '2px', height: '36px', overflow: 'hidden',
-              }}>
+            <div style={{ flex: 1, maxWidth: '560px' }} ref={searchRef}>
+              <form
+                onSubmit={handleSearchSubmit}
+                style={{
+                  display: 'flex', alignItems: 'center', backgroundColor: '#fff',
+                  borderRadius: '2px', height: '36px', overflow: 'hidden', position: 'relative'
+                }}
+              >
                 <input
                   type="text"
                   placeholder="Search for Products, Brands and More"
+                  value={searchQuery}
+                  onChange={(e) => {
+                    setSearchQuery(e.target.value);
+                    setShowDropdown(true);
+                  }}
+                  onFocus={() => setShowDropdown(true)}
                   style={{
                     flex: 1, border: 'none', outline: 'none', padding: '0 16px',
                     fontSize: '14px', color: '#212121', background: 'transparent', fontFamily: 'inherit',
                   }}
                 />
-                <div style={{
-                  width: '42px', height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  cursor: 'pointer',
-                }}>
+                <button
+                  type="submit"
+                  style={{
+                    width: '42px', height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    cursor: 'pointer', border: 'none', background: 'none'
+                  }}
+                >
                   <Search style={{ width: '18px', height: '18px', color: '#2874f0' }} />
-                </div>
-              </div>
+                </button>
+
+                {/* Search Dropdown Desktop */}
+                {showDropdown && searchQuery.trim().length >= 2 && (
+                  <div style={{
+                    position: 'absolute', top: '100%', left: 0, right: 0,
+                    backgroundColor: '#fff', boxShadow: '0 4px 16px rgba(0,0,0,0.2)',
+                    zIndex: 100, borderRadius: '0 0 2px 2px', maxHeight: '400px', overflowY: 'auto'
+                  }}>
+                    {searchResults.length > 0 ? (
+                      <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+                        {searchResults.map((product) => (
+                          <li key={product.id} style={{ borderBottom: '1px solid #f0f0f0' }}>
+                            <Link
+                              href={`/${product.title.toLowerCase().replace(/[^a-z0-9]+/g, '-')}/p/${product.id}`}
+                              onClick={() => setShowDropdown(false)}
+                              style={{
+                                display: 'flex', alignItems: 'center', padding: '10px 16px',
+                                gap: '12px', textDecoration: 'none', color: '#212121'
+                              }}
+                              className="hover:bg-blue-50 transition-colors"
+                            >
+                              <div style={{ width: '32px', height: '32px', position: 'relative', flexShrink: 0 }}>
+                                <Image src={product.image || product.images?.[0] || '/images/placeholder.png'} alt={product.title} fill style={{ objectFit: 'contain' }} />
+                              </div>
+                              <div style={{ flex: 1, minWidth: 0 }}>
+                                <div style={{ fontSize: '14px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                  {product.title}
+                                </div>
+                                <div style={{ fontSize: '12px', color: '#878787' }}>
+                                  in {product.category}
+                                </div>
+                              </div>
+                            </Link>
+                          </li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <div style={{ padding: '16px', textAlign: 'center', color: '#878787', fontSize: '14px' }}>
+                        No results found for "{searchQuery}"
+                      </div>
+                    )}
+                  </div>
+                )}
+              </form>
             </div>
 
             {/* Right Actions */}
@@ -207,22 +309,81 @@ const Navbar = () => {
 
           {/* Mobile Search */}
           <div className="mobile-only" style={{ paddingBottom: '10px' }}>
-            <div style={{
-              display: 'flex', alignItems: 'center', backgroundColor: '#fff',
-              borderRadius: '2px', height: '40px', overflow: 'hidden', width: '100%',
-            }}>
-              <div style={{ width: '40px', height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <form
+              onSubmit={handleSearchSubmit}
+              style={{
+                display: 'flex', alignItems: 'center', backgroundColor: '#fff',
+                borderRadius: '2px', height: '40px', overflow: 'hidden', width: '100%',
+                position: 'relative'
+              }}
+            >
+              <button
+                type="submit"
+                style={{
+                  width: '40px', height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  background: 'none', border: 'none', cursor: 'pointer'
+                }}
+              >
                 <Search style={{ width: '18px', height: '18px', color: '#717478' }} />
-              </div>
+              </button>
               <input
                 type="text"
                 placeholder="Search for Products, Brands and More"
+                value={searchQuery}
+                onChange={(e) => {
+                  setSearchQuery(e.target.value);
+                  setShowDropdown(true);
+                }}
+                onFocus={() => setShowDropdown(true)}
                 style={{
                   flex: 1, border: 'none', outline: 'none', paddingRight: '12px',
                   fontSize: '14px', color: '#212121', background: 'transparent', fontFamily: 'inherit',
                 }}
               />
-            </div>
+
+              {/* Search Dropdown Mobile */}
+              {showDropdown && searchQuery.trim().length >= 2 && (
+                <div style={{
+                  position: 'absolute', top: '100%', left: 0, right: 0,
+                  backgroundColor: '#fff', boxShadow: '0 4px 16px rgba(0,0,0,0.2)',
+                  zIndex: 100, borderRadius: '0 0 2px 2px', maxHeight: '300px', overflowY: 'auto'
+                }}>
+                  {searchResults.length > 0 ? (
+                    <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+                      {searchResults.map((product) => (
+                        <li key={product.id} style={{ borderBottom: '1px solid #f0f0f0' }}>
+                          <Link
+                            href={`/${product.title.toLowerCase().replace(/[^a-z0-9]+/g, '-')}/p/${product.id}`}
+                            onClick={() => setShowDropdown(false)}
+                            style={{
+                              display: 'flex', alignItems: 'center', padding: '10px 16px',
+                              gap: '12px', textDecoration: 'none', color: '#212121'
+                            }}
+                            className="hover:bg-blue-50 transition-colors"
+                          >
+                            <div style={{ width: '32px', height: '32px', position: 'relative', flexShrink: 0 }}>
+                              <Image src={product.image || product.images?.[0] || '/images/placeholder.png'} alt={product.title} fill style={{ objectFit: 'contain' }} />
+                            </div>
+                            <div style={{ flex: 1, minWidth: 0 }}>
+                              <div style={{ fontSize: '14px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                {product.title}
+                              </div>
+                              <div style={{ fontSize: '12px', color: '#878787' }}>
+                                in {product.category}
+                              </div>
+                            </div>
+                          </Link>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <div style={{ padding: '16px', textAlign: 'center', color: '#878787', fontSize: '14px' }}>
+                      No results found for "{searchQuery}"
+                    </div>
+                  )}
+                </div>
+              )}
+            </form>
           </div>
         </div>
       </div>
