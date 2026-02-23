@@ -1,0 +1,31 @@
+
+> temp_app@0.1.0 dev
+> next dev
+
+▲ Next.js 16.1.6 (Turbopack)
+- Local:         http://localhost:3000
+- Network:       http://192.168.31.139:3000
+
+✓ Starting...
+✓ Ready in 909ms
+ GET / 200 in 687ms (compile: 356ms, render: 331ms)
+ GET /api/search?q= 200 in 178ms (compile: 138ms, render: 40ms)
+ GET /images/products/apple-airpods-pro-2nd-gen-1.jpeg 404 in 282ms (compile: 98ms, render: 184ms)
+ GET /images/products/google-pixel-8-pro-1.jpeg 404 in 361ms (compile: 135ms, render: 226ms)
+⨯ The requested resource isn't a valid image for /images/products/apple-airpods-pro-2nd-gen-1.jpeg received null
+⨯ The requested resource isn't a valid image for /images/products/google-pixel-8-pro-1.jpeg received null
+ GET /api/search?q=app 200 in 14ms (compile: 3ms, render: 11ms)
+ GET /category/fashion 200 in 1046ms (compile: 967ms, render: 79ms)
+ GET /api/search?q= 200 in 17ms (compile: 3ms, render: 14ms)
+ GET /images/products/google-pixel-8-pro-1.jpeg 404 in 164ms (compile: 6ms, render: 158ms)
+⨯ The requested resource isn't a valid image for /images/products/google-pixel-8-pro-1.jpeg received null
+ GET /images/products/apple-airpods-pro-2nd-gen-1.jpeg 404 in 173ms (compile: 82ms, render: 92ms)
+⨯ The requested resource isn't a valid image for /images/products/apple-airpods-pro-2nd-gen-1.jpeg received null
+ GET /api/search?q=app 200 in 15ms (compile: 3ms, render: 12ms)
+ GET /search?q=app 200 in 630ms (compile: 33ms, render: 597ms)
+ GET /images/products/apple-airpods-pro-2nd-gen-1.jpeg 404 in 129ms (compile: 7ms, render: 122ms)
+⨯ The requested resource isn't a valid image for /images/products/apple-airpods-pro-2nd-gen-1.jpeg received null
+ GET /api/search?q= 200 in 16ms (compile: 2ms, render: 14ms)
+ GET / 200 in 21ms (compile: 4ms, render: 17ms)
+ GET / 200 in 24ms (compile: 4ms, render: 21ms)
+ GET /api/search?q=sam 200 in 16ms (compile: 3ms, render: 13ms)

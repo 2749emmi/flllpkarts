@@ -4,18 +4,28 @@ import Image from 'next/image';
 import { Search, ShoppingCart, User, ChevronDown, Store, Menu, X } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
 import { useCart } from '@/context/CartContext';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 
 const Navbar = () => {
   const router = useRouter();
+  const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { totalItems } = useCart();
 
   // Search State
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [searchSuggestions, setSearchSuggestions] = useState<string[]>([]);
   const [showDropdown, setShowDropdown] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
+
+  // Reset search state on route change (fixes broken search after navigation)
+  useEffect(() => {
+    setShowDropdown(false);
+    setSearchQuery('');
+    setSearchResults([]);
+    setSearchSuggestions([]);
+  }, [pathname]);
 
   // Close dropdown on outside click
   useEffect(() => {
@@ -33,16 +43,16 @@ const Navbar = () => {
     const fetchResults = async () => {
       try {
         const queryVal = searchQuery.trim();
-        // If query is empty, it will fetch trending items (from our updated API)
         const res = await fetch(`/api/search?q=${encodeURIComponent(queryVal)}`);
         const data = await res.json();
         setSearchResults(data.results || []);
+        setSearchSuggestions(data.suggestions || []);
       } catch (e) {
         console.error("Search failed", e);
       }
     };
 
-    const timeoutId = setTimeout(fetchResults, 300); // 300ms debounce
+    const timeoutId = setTimeout(fetchResults, 300);
     return () => clearTimeout(timeoutId);
   }, [searchQuery]);
 
@@ -125,47 +135,88 @@ const Navbar = () => {
                   <div style={{
                     position: 'absolute', top: '100%', left: 0, right: 0,
                     backgroundColor: '#fff', boxShadow: '0 4px 16px rgba(0,0,0,0.2)',
-                    zIndex: 100, borderRadius: '0 0 2px 2px', maxHeight: '400px', overflowY: 'auto'
+                    zIndex: 100, borderRadius: '0 0 2px 2px', maxHeight: '480px', overflowY: 'auto'
                   }}>
+                    {/* "Discover More" header when empty */}
                     {searchQuery.trim() === '' && searchResults.length > 0 && (
-                      <div style={{ padding: '12px 16px', borderBottom: '1px solid #f0f0f0', backgroundColor: '#f9f9f9' }}>
-                        <span style={{ fontSize: '13px', fontWeight: 700, color: '#878787', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Discover More</span>
+                      <div style={{ padding: '10px 16px', borderBottom: '1px solid #f0f0f0', backgroundColor: '#f5f5f6' }}>
+                        <span style={{ fontSize: '12px', fontWeight: 700, color: '#878787', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Discover More</span>
                       </div>
                     )}
-                    {searchResults.length > 0 ? (
+
+                    {/* Keyword Suggestions (like Flipkart/Amazon) */}
+                    {searchQuery.trim().length > 0 && searchSuggestions.length > 0 && (
                       <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
-                        {searchResults.map((product) => (
-                          <li key={product.id} style={{ borderBottom: '1px solid #f0f0f0' }}>
-                            <Link
-                              href={`/${product.title.toLowerCase().replace(/[^a-z0-9]+/g, '-')}/p/${product.id}`}
-                              onClick={() => setShowDropdown(false)}
+                        {searchSuggestions.map((suggestion, i) => (
+                          <li key={`sug-${i}`} style={{ borderBottom: '1px solid #f0f0f0' }}>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setSearchQuery(suggestion);
+                                setShowDropdown(false);
+                                router.push(`/search?q=${encodeURIComponent(suggestion)}`);
+                              }}
                               style={{
                                 display: 'flex', alignItems: 'center', padding: '10px 16px',
-                                gap: '12px', textDecoration: 'none', color: '#212121'
+                                gap: '12px', textDecoration: 'none', color: '#212121',
+                                width: '100%', border: 'none', background: 'none',
+                                cursor: 'pointer', textAlign: 'left', fontFamily: 'inherit', fontSize: '14px'
                               }}
-                              className="hover:bg-blue-50 transition-colors"
+                              onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#f5f5f6')}
+                              onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
                             >
-                              <div style={{ width: '32px', height: '32px', position: 'relative', flexShrink: 0 }}>
-                                <Image src={product.image || product.images?.[0] || '/images/placeholder.png'} alt={product.title} fill style={{ objectFit: 'contain' }} />
-                              </div>
-                              <div style={{ flex: 1, minWidth: 0 }}>
-                                <div style={{ fontSize: '14px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                                  {product.title}
-                                </div>
-                                <div style={{ fontSize: '12px', color: '#878787' }}>
-                                  in {product.category}
-                                </div>
-                              </div>
-                            </Link>
+                              <Search style={{ width: '16px', height: '16px', color: '#878787', flexShrink: 0 }} />
+                              <span style={{ textTransform: 'capitalize' }}>{suggestion}</span>
+                            </button>
                           </li>
                         ))}
                       </ul>
-                    ) : (
-                      searchQuery.trim().length > 0 && (
-                        <div style={{ padding: '16px', textAlign: 'center', color: '#878787', fontSize: '14px' }}>
-                          No results found for "{searchQuery}"
-                        </div>
-                      )
+                    )}
+
+                    {/* Product thumbnails */}
+                    {searchResults.length > 0 && (
+                      <>
+                        {searchQuery.trim().length > 0 && searchSuggestions.length > 0 && (
+                          <div style={{ padding: '8px 16px', borderBottom: '1px solid #f0f0f0', backgroundColor: '#f5f5f6' }}>
+                            <span style={{ fontSize: '12px', fontWeight: 700, color: '#878787', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Products</span>
+                          </div>
+                        )}
+                        <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+                          {searchResults.map((product) => (
+                            <li key={product.id} style={{ borderBottom: '1px solid #f0f0f0' }}>
+                              <Link
+                                href={`/${product.title.toLowerCase().replace(/[^a-z0-9]+/g, '-')}/p/${product.id}`}
+                                onClick={() => setShowDropdown(false)}
+                                style={{
+                                  display: 'flex', alignItems: 'center', padding: '10px 16px',
+                                  gap: '12px', textDecoration: 'none', color: '#212121'
+                                }}
+                                onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#f5f5f6')}
+                                onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
+                              >
+                                <div style={{ width: '32px', height: '32px', position: 'relative', flexShrink: 0 }}>
+                                  <Image src={product.image || product.images?.[0] || '/images/placeholder.png'} alt={product.title} fill style={{ objectFit: 'contain' }} />
+                                </div>
+                                <div style={{ flex: 1, minWidth: 0 }}>
+                                  <div style={{ fontSize: '14px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                    {product.title}
+                                  </div>
+                                  <div style={{ fontSize: '12px', color: '#878787' }}>
+                                    in {product.category}
+                                  </div>
+                                </div>
+                              </Link>
+                            </li>
+                          ))}
+                        </ul>
+                      </>
+                    )}
+
+                    {/* No results state */}
+                    {searchQuery.trim().length > 0 && searchResults.length === 0 && searchSuggestions.length === 0 && (
+                      <div style={{ padding: '16px', textAlign: 'center', color: '#878787', fontSize: '14px' }}>
+                        No results found for &ldquo;{searchQuery}&rdquo;
+                      </div>
                     )}
                   </div>
                 )}
@@ -351,47 +402,78 @@ const Navbar = () => {
                 <div style={{
                   position: 'absolute', top: '100%', left: 0, right: 0,
                   backgroundColor: '#fff', boxShadow: '0 4px 16px rgba(0,0,0,0.2)',
-                  zIndex: 100, borderRadius: '0 0 2px 2px', maxHeight: '300px', overflowY: 'auto'
+                  zIndex: 100, borderRadius: '0 0 2px 2px', maxHeight: '350px', overflowY: 'auto'
                 }}>
                   {searchQuery.trim() === '' && searchResults.length > 0 && (
-                    <div style={{ padding: '12px 16px', borderBottom: '1px solid #f0f0f0', backgroundColor: '#f9f9f9' }}>
-                      <span style={{ fontSize: '13px', fontWeight: 700, color: '#878787', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Discover More</span>
+                    <div style={{ padding: '10px 16px', borderBottom: '1px solid #f0f0f0', backgroundColor: '#f5f5f6' }}>
+                      <span style={{ fontSize: '12px', fontWeight: 700, color: '#878787', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Discover More</span>
                     </div>
                   )}
-                  {searchResults.length > 0 ? (
+                  {/* Keyword Suggestions */}
+                  {searchQuery.trim().length > 0 && searchSuggestions.length > 0 && (
                     <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
-                      {searchResults.map((product) => (
-                        <li key={product.id} style={{ borderBottom: '1px solid #f0f0f0' }}>
-                          <Link
-                            href={`/${product.title.toLowerCase().replace(/[^a-z0-9]+/g, '-')}/p/${product.id}`}
-                            onClick={() => setShowDropdown(false)}
+                      {searchSuggestions.map((suggestion, i) => (
+                        <li key={`msug-${i}`} style={{ borderBottom: '1px solid #f0f0f0' }}>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setSearchQuery(suggestion);
+                              setShowDropdown(false);
+                              router.push(`/search?q=${encodeURIComponent(suggestion)}`);
+                            }}
                             style={{
                               display: 'flex', alignItems: 'center', padding: '10px 16px',
-                              gap: '12px', textDecoration: 'none', color: '#212121'
+                              gap: '12px', width: '100%', border: 'none', background: 'none',
+                              cursor: 'pointer', textAlign: 'left', fontFamily: 'inherit', fontSize: '14px', color: '#212121'
                             }}
-                            className="hover:bg-blue-50 transition-colors"
                           >
-                            <div style={{ width: '32px', height: '32px', position: 'relative', flexShrink: 0 }}>
-                              <Image src={product.image || product.images?.[0] || '/images/placeholder.png'} alt={product.title} fill style={{ objectFit: 'contain' }} />
-                            </div>
-                            <div style={{ flex: 1, minWidth: 0 }}>
-                              <div style={{ fontSize: '14px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                                {product.title}
-                              </div>
-                              <div style={{ fontSize: '12px', color: '#878787' }}>
-                                in {product.category}
-                              </div>
-                            </div>
-                          </Link>
+                            <Search style={{ width: '16px', height: '16px', color: '#878787', flexShrink: 0 }} />
+                            <span style={{ textTransform: 'capitalize' }}>{suggestion}</span>
+                          </button>
                         </li>
                       ))}
                     </ul>
-                  ) : (
-                    searchQuery.trim().length > 0 && (
-                      <div style={{ padding: '16px', textAlign: 'center', color: '#878787', fontSize: '14px' }}>
-                        No results found for "{searchQuery}"
-                      </div>
-                    )
+                  )}
+                  {/* Product thumbnails */}
+                  {searchResults.length > 0 && (
+                    <>
+                      {searchQuery.trim().length > 0 && searchSuggestions.length > 0 && (
+                        <div style={{ padding: '8px 16px', borderBottom: '1px solid #f0f0f0', backgroundColor: '#f5f5f6' }}>
+                          <span style={{ fontSize: '12px', fontWeight: 700, color: '#878787', textTransform: 'uppercase' }}>Products</span>
+                        </div>
+                      )}
+                      <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+                        {searchResults.map((product) => (
+                          <li key={product.id} style={{ borderBottom: '1px solid #f0f0f0' }}>
+                            <Link
+                              href={`/${product.title.toLowerCase().replace(/[^a-z0-9]+/g, '-')}/p/${product.id}`}
+                              onClick={() => setShowDropdown(false)}
+                              style={{
+                                display: 'flex', alignItems: 'center', padding: '10px 16px',
+                                gap: '12px', textDecoration: 'none', color: '#212121'
+                              }}
+                            >
+                              <div style={{ width: '32px', height: '32px', position: 'relative', flexShrink: 0 }}>
+                                <Image src={product.image || product.images?.[0] || '/images/placeholder.png'} alt={product.title} fill style={{ objectFit: 'contain' }} />
+                              </div>
+                              <div style={{ flex: 1, minWidth: 0 }}>
+                                <div style={{ fontSize: '14px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                  {product.title}
+                                </div>
+                                <div style={{ fontSize: '12px', color: '#878787' }}>
+                                  in {product.category}
+                                </div>
+                              </div>
+                            </Link>
+                          </li>
+                        ))}
+                      </ul>
+                    </>
+                  )}
+                  {searchQuery.trim().length > 0 && searchResults.length === 0 && searchSuggestions.length === 0 && (
+                    <div style={{ padding: '16px', textAlign: 'center', color: '#878787', fontSize: '14px' }}>
+                      No results found for &ldquo;{searchQuery}&rdquo;
+                    </div>
                   )}
                 </div>
               )}
