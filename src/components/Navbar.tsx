@@ -31,12 +31,10 @@ const Navbar = () => {
   // Handle live search
   useEffect(() => {
     const fetchResults = async () => {
-      if (searchQuery.trim().length < 2) {
-        setSearchResults([]);
-        return;
-      }
       try {
-        const res = await fetch(`/api/search?q=${encodeURIComponent(searchQuery)}`);
+        const queryVal = searchQuery.trim();
+        // If query is empty, it will fetch trending items (from our updated API)
+        const res = await fetch(`/api/search?q=${encodeURIComponent(queryVal)}`);
         const data = await res.json();
         setSearchResults(data.results || []);
       } catch (e) {
@@ -123,12 +121,17 @@ const Navbar = () => {
                 </button>
 
                 {/* Search Dropdown Desktop */}
-                {showDropdown && searchQuery.trim().length >= 2 && (
+                {showDropdown && (
                   <div style={{
                     position: 'absolute', top: '100%', left: 0, right: 0,
                     backgroundColor: '#fff', boxShadow: '0 4px 16px rgba(0,0,0,0.2)',
                     zIndex: 100, borderRadius: '0 0 2px 2px', maxHeight: '400px', overflowY: 'auto'
                   }}>
+                    {searchQuery.trim() === '' && searchResults.length > 0 && (
+                      <div style={{ padding: '12px 16px', borderBottom: '1px solid #f0f0f0', backgroundColor: '#f9f9f9' }}>
+                        <span style={{ fontSize: '13px', fontWeight: 700, color: '#878787', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Discover More</span>
+                      </div>
+                    )}
                     {searchResults.length > 0 ? (
                       <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
                         {searchResults.map((product) => (
@@ -158,9 +161,11 @@ const Navbar = () => {
                         ))}
                       </ul>
                     ) : (
-                      <div style={{ padding: '16px', textAlign: 'center', color: '#878787', fontSize: '14px' }}>
-                        No results found for "{searchQuery}"
-                      </div>
+                      searchQuery.trim().length > 0 && (
+                        <div style={{ padding: '16px', textAlign: 'center', color: '#878787', fontSize: '14px' }}>
+                          No results found for "{searchQuery}"
+                        </div>
+                      )
                     )}
                   </div>
                 )}
@@ -342,12 +347,17 @@ const Navbar = () => {
               />
 
               {/* Search Dropdown Mobile */}
-              {showDropdown && searchQuery.trim().length >= 2 && (
+              {showDropdown && (
                 <div style={{
                   position: 'absolute', top: '100%', left: 0, right: 0,
                   backgroundColor: '#fff', boxShadow: '0 4px 16px rgba(0,0,0,0.2)',
                   zIndex: 100, borderRadius: '0 0 2px 2px', maxHeight: '300px', overflowY: 'auto'
                 }}>
+                  {searchQuery.trim() === '' && searchResults.length > 0 && (
+                    <div style={{ padding: '12px 16px', borderBottom: '1px solid #f0f0f0', backgroundColor: '#f9f9f9' }}>
+                      <span style={{ fontSize: '13px', fontWeight: 700, color: '#878787', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Discover More</span>
+                    </div>
+                  )}
                   {searchResults.length > 0 ? (
                     <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
                       {searchResults.map((product) => (
@@ -377,9 +387,11 @@ const Navbar = () => {
                       ))}
                     </ul>
                   ) : (
-                    <div style={{ padding: '16px', textAlign: 'center', color: '#878787', fontSize: '14px' }}>
-                      No results found for "{searchQuery}"
-                    </div>
+                    searchQuery.trim().length > 0 && (
+                      <div style={{ padding: '16px', textAlign: 'center', color: '#878787', fontSize: '14px' }}>
+                        No results found for "{searchQuery}"
+                      </div>
+                    )
                   )}
                 </div>
               )}
