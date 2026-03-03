@@ -48,12 +48,17 @@ export function CartProvider({ children }: { children: ReactNode }) {
     const addToCart = (product: Product) => {
         setItems(prev => {
             const existing = prev.find(item => item.id === product.id);
+            let newItems;
             if (existing) {
-                return prev.map(item =>
+                newItems = prev.map(item =>
                     item.id === product.id ? { ...item, quantity: item.quantity + 1 } : item
                 );
+            } else {
+                newItems = [...prev, { ...product, quantity: 1 }];
             }
-            return [...prev, { ...product, quantity: 1 }];
+            // Immediately save to localStorage
+            localStorage.setItem('fk_cart', JSON.stringify(newItems));
+            return newItems;
         });
         showToast(`Added ${product.title} to Cart`, true);
     };

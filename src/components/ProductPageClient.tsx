@@ -4,7 +4,8 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { Star, Tag, Truck, Shield, RotateCcw, ShoppingCart, Zap, Heart, Share2, ThumbsUp, ThumbsDown, ChevronDown, ChevronUp, MapPin } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
-import { Product } from '@/data/products';
+import { Product, products } from '@/data/products';
+import { getProductUrl } from '@/utils/url';
 
 function RatingBar({ stars, count, total }: { stars: number; count: number; total: number }) {
   const pct = total > 0 ? (count / total) * 100 : 0;
@@ -63,7 +64,10 @@ export default function ProductPageClient({ product }: { product: Product }) {
 
   const handleBuyNow = useCallback(() => {
     addToCart(product);
-    window.location.href = '/checkout';
+    // Use requestAnimationFrame to ensure state and localStorage are updated
+    requestAnimationFrame(() => {
+      window.location.href = '/checkout';
+    });
   }, [addToCart, product]);
 
   const handlePincodeCheck = useCallback(() => {
@@ -227,29 +231,8 @@ export default function ProductPageClient({ product }: { product: Product }) {
               </span>
             </div>
 
-            {/* Offers */}
-            {product.offers.length > 0 && (
-              <div style={{ marginBottom: '20px' }}>
-                <h3 style={{ fontWeight: 700, fontSize: '14px', color: '#212121', marginBottom: '10px' }}>Available offers</h3>
-                <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
-                  {visibleOffers.map((offer, i) => (
-                    <li key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: '8px', fontSize: '13px', color: '#212121', marginBottom: '8px', lineHeight: 1.5 }}>
-                      <Tag style={{ width: '14px', height: '14px', color: '#388e3c', marginTop: '3px', flexShrink: 0 }} />
-                      <span dangerouslySetInnerHTML={{ __html: offer.replace(/^([^:]+:)/, '<strong>$1</strong>') }} />
-                    </li>
-                  ))}
-                </ul>
-                {product.offers.length > 4 && (
-                  <button onClick={() => setShowAllOffers(!showAllOffers)} style={{
-                    color: '#2874f0', fontSize: '13px', fontWeight: 600, background: 'none', border: 'none',
-                    cursor: 'pointer', padding: '4px 0', display: 'flex', alignItems: 'center', gap: '4px', fontFamily: 'inherit',
-                  }}>
-                    {showAllOffers ? 'Show less' : `View ${product.offers.length - 4} more offers`}
-                    {showAllOffers ? <ChevronUp style={{ width: '14px', height: '14px' }} /> : <ChevronDown style={{ width: '14px', height: '14px' }} />}
-                  </button>
-                )}
-              </div>
-            )}
+
+
 
             {/* Delivery */}
             <div style={{ marginBottom: '20px', paddingBottom: '16px', borderBottom: '1px solid #f0f0f0' }}>
@@ -404,6 +387,62 @@ export default function ProductPageClient({ product }: { product: Product }) {
                 )}
               </div>
             )}
+
+            {/* Similar Products */}
+            {(() => {
+              const similar = products
+                .filter(p => p.category === product.category && p.id !== product.id)
+                .slice(0, 6);
+              if (similar.length === 0) return null;
+              return (
+                <div style={{ marginBottom: '24px', paddingBottom: '20px', borderBottom: '1px solid #f0f0f0' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+                    <h2 style={{ fontSize: '18px', fontWeight: 700, color: '#212121', margin: 0 }}>Similar Products</h2>
+                    <Link href={`/category/${product.category}`} style={{ fontSize: '14px', color: '#2874f0', fontWeight: 600, textDecoration: 'none' }}>View All</Link>
+                  </div>
+                  <div className="hide-scrollbar" style={{
+                    display: 'flex', gap: '12px', overflowX: 'auto', paddingBottom: '4px',
+                  }}>
+                    {similar.map(sp => (
+                      <Link key={sp.id} href={getProductUrl(sp.title, sp.id)} style={{ textDecoration: 'none', flexShrink: 0, width: '140px' }}>
+                        <div style={{ position: 'relative' }}>
+                          <div style={{ width: '140px', height: '140px', position: 'relative', backgroundColor: '#fff', borderRadius: '4px', overflow: 'hidden' }}>
+                            <Image src={sp.image} alt={sp.title} fill style={{ objectFit: 'contain', padding: '8px' }} sizes="140px" />
+                          </div>
+                          <button onClick={e => e.preventDefault()} style={{
+                            position: 'absolute', top: '6px', right: '6px',
+                            width: '28px', height: '28px', borderRadius: '50%', backgroundColor: '#fff',
+                            boxShadow: '0 1px 3px rgba(0,0,0,0.15)', display: 'flex',
+                            alignItems: 'center', justifyContent: 'center', border: 'none', cursor: 'pointer',
+                          }}>
+                            <Heart style={{ width: '14px', height: '14px', color: '#878787' }} />
+                          </button>
+                        </div>
+                        <div style={{ marginTop: '8px' }}>
+                          <p style={{ fontSize: '13px', fontWeight: 500, color: '#212121', margin: '0 0 2px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                            {sp.brand || sp.title.split(' ')[0]}
+                          </p>
+                          <p style={{ fontSize: '11px', color: '#878787', margin: '0 0 4px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                            {sp.title}
+                          </p>
+                          <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px', flexWrap: 'wrap' }}>
+                            <span style={{ fontSize: '11px', color: '#388e3c', fontWeight: 600 }}>↓{sp.discount}%</span>
+                            <span style={{ fontSize: '10px', color: '#878787', textDecoration: 'line-through' }}>₹{sp.originalPrice.toLocaleString('en-IN')}</span>
+                            <span style={{ fontSize: '14px', fontWeight: 700, color: '#212121' }}>₹{sp.price.toLocaleString('en-IN')}</span>
+                          </div>
+
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '2px', marginTop: '4px' }}>
+                            {[1, 2, 3, 4, 5].map(s => (
+                              <Star key={s} style={{ width: '10px', height: '10px', color: s <= Math.round(sp.rating) ? '#ffc107' : '#e0e0e0' }} fill={s <= Math.round(sp.rating) ? '#ffc107' : '#e0e0e0'} />
+                            ))}
+                          </div>
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              );
+            })()}
 
             {/* Ratings & Reviews */}
             {reviews.length > 0 && (

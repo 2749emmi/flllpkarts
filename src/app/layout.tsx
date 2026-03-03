@@ -31,11 +31,7 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body className={roboto.className} style={{ margin: 0, padding: 0 }} suppressHydrationWarning>
         <CartProvider>
-          <Navbar />
-          <main style={{ minHeight: '100vh', backgroundColor: '#f1f3f6' }}>
-            {children}
-          </main>
-          <Footer />
+          {children}
         </CartProvider>
       </body>
     </html>
