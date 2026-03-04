@@ -58,12 +58,24 @@ export async function addManualProduct(data: any) {
 
 export async function scrapeProductFromUrl(url: string, targetPriceStr?: string) {
     try {
+        // Ensure directories exist
+        const imagesDir = path.join(process.cwd(), 'public/images/products');
+        if (!fs.existsSync(imagesDir)) {
+            fs.mkdirSync(imagesDir, { recursive: true });
+        }
+
         // 1. Run the scraper
-        await execAsync(`node "${scriptPath}" "${url}" --download`);
+        console.log('Running scraper for:', url);
+        const result = await execAsync(`node "${scriptPath}" "${url}" --download`, {
+            timeout: 60000, // 60 second timeout
+            maxBuffer: 10 * 1024 * 1024 // 10MB buffer
+        });
+        console.log('Scraper output:', result.stdout);
+        if (result.stderr) console.error('Scraper stderr:', result.stderr);
 
         // 2. Read the output
         if (!fs.existsSync(scrapedPath)) {
-            throw new Error("Scraper failed to generate output file.");
+            throw new Error("Scraper failed to generate output file. Check if the URL is valid.");
         }
         const scrapedData = JSON.parse(fs.readFileSync(scrapedPath, 'utf8'));
 
@@ -71,6 +83,10 @@ export async function scrapeProductFromUrl(url: string, targetPriceStr?: string)
 
         if (productDetails.error) {
             throw new Error(productDetails.error);
+        }
+
+        if (!productDetails.title) {
+            throw new Error("Failed to extract product data. The page structure might have changed.");
         }
 
         // 3. Format and append to our DB
@@ -95,12 +111,18 @@ export async function scrapeProductFromUrl(url: string, targetPriceStr?: string)
         fs.writeFileSync(productsPath, JSON.stringify(products, null, 2));
 
         // Clean up temp file
-        fs.unlinkSync(scrapedPath);
+        if (fs.existsSync(scrapedPath)) {
+            fs.unlinkSync(scrapedPath);
+        }
 
         revalidatePath('/admin');
         revalidatePath('/');
         return { success: true, title: productDetails.title };
     } catch (error: any) {
-        return { success: false, error: error.message };
+        console.error('Scraper error:', error);
+        return { 
+            success: false, 
+            error: error.message || 'Unknown error occurred while scraping'
+        };
     }
 }
