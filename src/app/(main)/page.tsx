@@ -139,9 +139,13 @@ function DealRow({
                 }}>
                   {product.title.split('(')[0].trim()}
                 </p>
-                <p style={{ fontSize: '13px', color: '#388e3c', fontWeight: 600, marginBottom: '2px' }}>
-                  From ₹{product.price.toLocaleString('en-IN')}
-                </p>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px', flexWrap: 'wrap', marginBottom: '2px' }}>
+                  <p style={{ fontSize: '13px', color: '#388e3c', fontWeight: 600, margin: 0 }}>
+                    From ₹{product.price.toLocaleString('en-IN')}
+                  </p>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src="https://static-assets-web.flixcart.com/fk-p-linchpin-web/fk-cp-zion/img/fa_62673a.png" alt="Flipkart Assured" style={{ height: '12px', width: 'auto', flexShrink: 0 }} />
+                </div>
                 {product.discount > 0 && (
                   <p style={{ fontSize: '12px', color: '#212121', fontWeight: 400 }}>
                     {product.discount}% Off
@@ -286,9 +290,13 @@ function DealsOfTheDay() {
                 }}>
                   {product.title.split('(')[0].trim()}
                 </p>
-                <p style={{ fontSize: '13px', color: '#388e3c', fontWeight: 600, marginBottom: '2px' }}>
-                  From ₹{product.price.toLocaleString('en-IN')}
-                </p>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px', flexWrap: 'wrap', marginBottom: '2px' }}>
+                  <p style={{ fontSize: '13px', color: '#388e3c', fontWeight: 600, margin: 0 }}>
+                    From ₹{product.price.toLocaleString('en-IN')}
+                  </p>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src="https://static-assets-web.flixcart.com/fk-p-linchpin-web/fk-cp-zion/img/fa_62673a.png" alt="Flipkart Assured" style={{ height: '12px', width: 'auto', flexShrink: 0 }} />
+                </div>
                 <p style={{ fontSize: '12px', color: '#212121', fontWeight: 400 }}>
                   {product.discount}% Off
                 </p>
@@ -384,9 +392,13 @@ function SuggestedGrid() {
                 }}>
                   {product.title.split('(')[0].trim()}
                 </p>
-                <p style={{ fontSize: '13px', color: '#388e3c', fontWeight: 600, marginBottom: '2px' }}>
-                  ₹{product.price.toLocaleString('en-IN')}
-                </p>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px', flexWrap: 'wrap', marginBottom: '2px' }}>
+                  <p style={{ fontSize: '13px', color: '#388e3c', fontWeight: 600, margin: 0 }}>
+                    ₹{product.price.toLocaleString('en-IN')}
+                  </p>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src="https://static-assets-web.flixcart.com/fk-p-linchpin-web/fk-cp-zion/img/fa_62673a.png" alt="Flipkart Assured" style={{ height: '12px', width: 'auto', flexShrink: 0 }} />
+                </div>
                 <p style={{ fontSize: '12px', color: '#878787', fontWeight: 400 }}>
                   {product.discount}% Off
                 </p>

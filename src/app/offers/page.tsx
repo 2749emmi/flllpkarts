@@ -55,12 +55,11 @@ function ListProductCard({ product }: { product: Product }) {
             {product.rating} ★
           </span>
           <span style={{ color: '#878787', fontSize: '13px' }}>({product.ratingCount})</span>
-          <Image
-            src="/images/assured-badge.svg"
-            alt="Assured"
-            width={56}
-            height={22}
-            style={{ objectFit: 'contain' }}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="https://static-assets-web.flixcart.com/fk-p-linchpin-web/fk-cp-zion/img/fa_62673a.png"
+            alt="Flipkart Assured"
+            style={{ height: '14px', width: 'auto' }}
           />
         </div>
         <ul style={{ listStyle: 'disc', paddingLeft: '18px', margin: '4px 0 0', color: '#878787', fontSize: '13px', lineHeight: 1.7 }}>
@@ -125,13 +124,16 @@ function GridProductCard({ product }: { product: Product }) {
         </span>
         <span style={{ color: '#878787', fontSize: '11px' }}>({product.ratingCount})</span>
       </div>
-      <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px', flexWrap: 'wrap' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '4px', flexWrap: 'wrap', marginBottom: '4px' }}>
         <span style={{ fontSize: '14px', fontWeight: 700, color: '#212121' }}>
           ₹{product.price.toLocaleString('en-IN')}
         </span>
-        <span style={{ color: '#878787', fontSize: '11px', textDecoration: 'line-through' }}>
-          ₹{product.originalPrice.toLocaleString('en-IN')}
-        </span>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="https://static-assets-web.flixcart.com/fk-p-linchpin-web/fk-cp-zion/img/fa_62673a.png"
+          alt="Flipkart Assured"
+          style={{ height: '13px', width: 'auto', flexShrink: 0 }}
+        />
       </div>
       <span style={{ color: '#388e3c', fontSize: '12px', fontWeight: 600 }}>
         {product.discount}% off

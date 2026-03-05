@@ -354,22 +354,12 @@ export default function CategoryPage() {
                           <span style={{ fontSize: '16px', fontWeight: 600, color: '#212121' }}>
                             ₹{product.price.toLocaleString('en-IN')}
                           </span>
-                          {/* F-Assured badge */}
-                          <span style={{
-                            display: 'inline-flex', alignItems: 'center', gap: '2px',
-                            border: '1px solid #47c9a2', borderRadius: '10px',
-                            padding: '1px 5px 1px 2px', flexShrink: 0,
-                          }}>
-                            <span style={{
-                              width: '14px', height: '14px', borderRadius: '50%',
-                              backgroundColor: '#2874f0',
-                              display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-                              flexShrink: 0,
-                            }}>
-                              <span style={{ color: '#fff', fontSize: '8px', fontWeight: 900, fontStyle: 'italic' }}>F</span>
-                            </span>
-                            <span style={{ color: '#47c9a2', fontSize: '9px', fontWeight: 700 }}>Assured</span>
-                          </span>
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img
+                            src="https://static-assets-web.flixcart.com/fk-p-linchpin-web/fk-cp-zion/img/fa_62673a.png"
+                            alt="Flipkart Assured"
+                            style={{ height: '13px', width: 'auto', flexShrink: 0 }}
+                          />
                         </div>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '2px' }}>
                           <span style={{ fontSize: '12px', color: '#878787', textDecoration: 'line-through' }}>
