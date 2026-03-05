@@ -4,6 +4,7 @@ import { ShoppingCart } from 'lucide-react';
 import Image from 'next/image';
 import { useCart } from '@/context/CartContext';
 import { Product } from '@/data/products';
+import { proxyImage } from '@/lib/imageProxy';
 
 interface ProductProps {
   id: string;
@@ -48,13 +49,12 @@ const ProductCard = ({ id, title, price, originalPrice, discount, image, rating 
         position: 'relative', height: '160px', width: '100%', marginBottom: '12px',
         display: 'flex', alignItems: 'center', justifyContent: 'center',
       }}>
-        <Image
-          src={image}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={proxyImage(image)}
           alt={title}
-          fill
-          style={{ objectFit: 'contain', padding: '4px' }}
-          sizes="(max-width: 640px) 45vw, (max-width: 1024px) 30vw, 200px"
           loading="lazy"
+          style={{ width: '100%', height: '100%', objectFit: 'contain', padding: '4px' }}
         />
       </div>
 
@@ -78,11 +78,21 @@ const ProductCard = ({ id, title, price, originalPrice, discount, image, rating 
         <span style={{ color: '#878787', fontSize: '12px' }}>(1,234)</span>
       </div>
 
-      {/* Price */}
-      <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px', flexWrap: 'wrap' }}>
+      {/* Price row */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap', marginBottom: '2px' }}>
         <span style={{ fontSize: '16px', fontWeight: 700, color: '#212121' }}>
           ₹{price.toLocaleString('en-IN')}
         </span>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="https://static-assets-web.flixcart.com/fk-p-linchpin-web/fk-cp-zion/img/fa_62673a.png"
+          alt="Flipkart Assured"
+          style={{ height: '14px', width: 'auto', display: 'inline-block', flexShrink: 0 }}
+        />
+      </div>
+
+      {/* Strikethrough + discount */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}>
         <span style={{ color: '#878787', fontSize: '13px', textDecoration: 'line-through' }}>
           ₹{originalPrice.toLocaleString('en-IN')}
         </span>
@@ -92,7 +102,7 @@ const ProductCard = ({ id, title, price, originalPrice, discount, image, rating 
       </div>
 
       {/* Free delivery */}
-      <p style={{ fontSize: '12px', color: '#212121', marginTop: '6px', fontWeight: 400 }}>
+      <p style={{ fontSize: '12px', color: '#212121', marginBottom: '0', fontWeight: 400 }}>
         Free delivery
       </p>
 

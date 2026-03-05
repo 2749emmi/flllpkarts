@@ -1,0 +1,12 @@
+
+Scraping 1 product(s)...
+
+[1/1] Scraping...
+  Fetching HTML for: https://www.flipkart.com/samsung-galaxy-s24-5g-snapdragon-onyx-black-256-gb/p/itm0eb31619428e4?pid=MOBHDVFKVGGGHBDX
+  Got 403, retrying with clean URL...
+  ✗ Error: HTTP 403. Flipkart blocked the request. Try: 1) Wait a few minutes 2) Use Manual Entry 3) Copy product details manually
+
+Saved to /home/ksx/Desktop/flipkart/scripts/scraped-product.json
+
+--- Summary ---
+  1. ERROR: HTTP 403. Flipkart blocked the request. Try: 1) Wait a few minutes 2) Use Manual Entry 3) Copy product details manually

@@ -2,6 +2,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { products } from '@/data/products';
 import { getProductUrl } from '@/utils/url';
+import { proxyImage } from '@/lib/imageProxy';
 
 const categoryNames: Record<string, string> = {
     mobiles: 'Mobiles',
@@ -144,13 +145,12 @@ export default async function CategoryPage({ params }: { params: Promise<{ slug:
                                             width: '100%', aspectRatio: '1', position: 'relative', marginBottom: '8px',
                                             display: 'flex', alignItems: 'center', justifyContent: 'center',
                                         }}>
-                                            <Image
-                                                src={product.image}
+                                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                                            <img
+                                                src={proxyImage(product.image)}
                                                 alt={product.title}
-                                                fill
-                                                style={{ objectFit: 'contain', padding: '6px' }}
-                                                sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
                                                 loading="lazy"
+                                                style={{ width: '100%', height: '100%', objectFit: 'contain', padding: '6px' }}
                                             />
                                         </div>
                                         <p style={{
@@ -169,17 +169,26 @@ export default async function CategoryPage({ params }: { params: Promise<{ slug:
                                             </span>
                                             <span style={{ color: '#878787', fontSize: '11px' }}>({product.ratingCount})</span>
                                         </div>
-                                        <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px', flexWrap: 'wrap' }}>
+                                        {/* Price + F-Assured logo */}
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '5px', flexWrap: 'wrap', marginBottom: '2px' }}>
                                             <span style={{ fontSize: '14px', fontWeight: 700, color: '#212121' }}>
                                                 ₹{product.price.toLocaleString('en-IN')}
                                             </span>
+                                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                                            <img
+                                                src="https://static-assets-web.flixcart.com/fk-p-linchpin-web/fk-cp-zion/img/fa_62673a.png"
+                                                alt="Flipkart Assured"
+                                                style={{ height: '13px', width: 'auto', display: 'inline-block', flexShrink: 0 }}
+                                            />
+                                        </div>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '4px', marginBottom: '2px' }}>
                                             <span style={{ color: '#878787', fontSize: '11px', textDecoration: 'line-through' }}>
                                                 ₹{product.originalPrice.toLocaleString('en-IN')}
                                             </span>
+                                            <span style={{ color: '#388e3c', fontSize: '12px', fontWeight: 600 }}>
+                                                {product.discount}% off
+                                            </span>
                                         </div>
-                                        <span style={{ color: '#388e3c', fontSize: '12px', fontWeight: 600 }}>
-                                            {product.discount}% off
-                                        </span>
                                         <p style={{ fontSize: '11px', color: '#212121', margin: '4px 0 0' }}>
                                             Free delivery
                                         </p>

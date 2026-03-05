@@ -6,6 +6,7 @@ import { Star, Tag, Truck, Shield, RotateCcw, ShoppingCart, Zap, Heart, Share2, 
 import { useCart } from '@/context/CartContext';
 import { Product, products } from '@/data/products';
 import { getProductUrl } from '@/utils/url';
+import { proxyImage } from '@/lib/imageProxy';
 
 function RatingBar({ stars, count, total }: { stars: number; count: number; total: number }) {
   const pct = total > 0 ? (count / total) * 100 : 0;
@@ -106,7 +107,8 @@ export default function ProductPageClient({ product }: { product: Product }) {
                       cursor: 'pointer', position: 'relative', overflow: 'hidden',
                     }}
                   >
-                    <Image src={img} alt={`View ${i + 1}`} fill style={{ objectFit: 'contain', padding: '2px' }} sizes="48px" />
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={proxyImage(img)} alt={`View ${i + 1}`} style={{ width: '100%', height: '100%', objectFit: 'contain', padding: '2px' }} />
                   </button>
                 ))}
               </div>
@@ -145,13 +147,11 @@ export default function ProductPageClient({ product }: { product: Product }) {
                   </div>
                 )}
 
-                <Image
-                  src={images[selectedImage]}
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={proxyImage(images[selectedImage])}
                   alt={product.title}
-                  fill
-                  style={{ objectFit: 'contain', padding: '32px' }}
-                  sizes="(max-width: 768px) 100vw, 480px"
-                  priority
+                  style={{ width: '100%', height: '100%', objectFit: 'contain', padding: '32px', position: 'absolute', inset: 0 }}
                 />
               </div>
             </div>
@@ -407,7 +407,8 @@ export default function ProductPageClient({ product }: { product: Product }) {
                       <Link key={sp.id} href={getProductUrl(sp.title, sp.id)} style={{ textDecoration: 'none', flexShrink: 0, width: '140px' }}>
                         <div style={{ position: 'relative' }}>
                           <div style={{ width: '140px', height: '140px', position: 'relative', backgroundColor: '#fff', borderRadius: '4px', overflow: 'hidden' }}>
-                            <Image src={sp.image} alt={sp.title} fill style={{ objectFit: 'contain', padding: '8px' }} sizes="140px" />
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img src={proxyImage(sp.image)} alt={sp.title} style={{ width: '100%', height: '100%', objectFit: 'contain', padding: '8px' }} />
                           </div>
                           <button onClick={e => e.preventDefault()} style={{
                             position: 'absolute', top: '6px', right: '6px',

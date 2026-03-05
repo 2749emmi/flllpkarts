@@ -7,13 +7,14 @@ import Image from 'next/image';
 import { getProductUrl } from '@/utils/url';
 import { Star, SlidersHorizontal, ArrowUpDown, Heart } from 'lucide-react';
 import { useState } from 'react';
+import { proxyImage } from '@/lib/imageProxy';
 
 const categoryConfig: Record<string, { title: string; keywords: string[]; category?: string }> = {
   // Keyword-based categories
   earbud: { title: 'Earbuds', keywords: ['earbud', 'airpod', 'wireless earphone', 'tws', 'bluetooth earphone'] },
   laptop: { title: 'Laptops', keywords: ['laptop', 'notebook', 'macbook', 'chromebook'] },
   phone: { title: 'Smartphones', keywords: ['iphone', 'samsung', 'phone', 'smartphone', 'mobile'] },
-  
+
   // Category-based (exact match)
   mobiles: { title: 'Mobiles', keywords: [], category: 'mobiles' },
   electronics: { title: 'Electronics', keywords: [], category: 'electronics' },
@@ -125,7 +126,7 @@ export default function CategoryPage() {
               <span>&gt;</span>
               <span style={{ color: '#212121', textTransform: 'capitalize' }}>{config.title}</span>
             </div>
-            
+
             {/* Title */}
             <h1 style={{ fontSize: '18px', fontWeight: 500, color: '#212121', margin: 0 }}>
               {config.title} <span style={{ color: '#878787', fontSize: '14px' }}>({sortedProducts.length} products)</span>
@@ -283,102 +284,120 @@ export default function CategoryPage() {
             </div>
 
             <div className="cat-products-grid">
-            {sortedProducts.map(product => (
-              <Link
-                key={product.id}
-                href={getProductUrl(product.title, product.id)}
-                style={{ textDecoration: 'none', position: 'relative' }}
-              >
-                <div className="cat-product-card">
-                  {/* Wishlist Heart */}
-                  <button
-                    onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
-                    style={{
-                      position: 'absolute', top: '8px', right: '8px', zIndex: 2,
-                      width: '32px', height: '32px', borderRadius: '50%', backgroundColor: 'rgba(255,255,255,0.9)',
-                      border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      cursor: 'pointer', boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
-                    }}
-                  >
-                    <Heart size={16} color="#878787" />
-                  </button>
+              {sortedProducts.map(product => (
+                <Link
+                  key={product.id}
+                  href={getProductUrl(product.title, product.id)}
+                  style={{ textDecoration: 'none', position: 'relative' }}
+                >
+                  <div className="cat-product-card">
+                    {/* Wishlist Heart */}
+                    <button
+                      onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
+                      style={{
+                        position: 'absolute', top: '8px', right: '8px', zIndex: 2,
+                        width: '32px', height: '32px', borderRadius: '50%', backgroundColor: 'rgba(255,255,255,0.9)',
+                        border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        cursor: 'pointer', boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+                      }}
+                    >
+                      <Heart size={16} color="#878787" />
+                    </button>
 
-                  {/* Image */}
-                  <div style={{ width: '100%', paddingTop: '100%', position: 'relative', backgroundColor: '#fafafa' }}>
-                    <Image
-                      src={product.image}
-                      alt={product.title}
-                      fill
-                      style={{ objectFit: 'contain', padding: '12px' }}
-                      sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 220px"
-                    />
-                  </div>
+                    {/* Image */}
+                    <div style={{ width: '100%', paddingTop: '100%', position: 'relative', backgroundColor: '#fafafa' }}>
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={proxyImage(product.image)}
+                        alt={product.title}
+                        loading="lazy"
+                        style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'contain', padding: '12px' }}
+                      />
+                    </div>
 
-                  {/* Details */}
-                  <div style={{ padding: '12px', display: 'flex', flexDirection: 'column', flex: 1 }}>
-                    {/* Brand/Title */}
-                    <h3 style={{
-                      fontSize: '14px', fontWeight: 500, color: '#212121', marginBottom: '6px',
-                      overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-                    }}>
-                      {product.brand || product.title.split(' ')[0]}
-                    </h3>
-
-                    {/* Product Name */}
-                    <p style={{
-                      fontSize: '12px', color: '#878787', marginBottom: '8px',
-                      display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical',
-                      overflow: 'hidden', minHeight: '32px', lineHeight: '16px',
-                    }}>
-                      {product.title}
-                    </p>
-
-                    {/* Rating */}
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px', marginBottom: '8px' }}>
-                      <div style={{
-                        backgroundColor: '#388e3c', color: '#fff', padding: '2px 6px',
-                        borderRadius: '3px', fontSize: '11px', fontWeight: 600,
-                        display: 'inline-flex', alignItems: 'center', gap: '2px',
+                    {/* Details */}
+                    <div style={{ padding: '12px', display: 'flex', flexDirection: 'column', flex: 1 }}>
+                      {/* Brand/Title */}
+                      <h3 style={{
+                        fontSize: '14px', fontWeight: 500, color: '#212121', marginBottom: '6px',
+                        overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
                       }}>
-                        {product.rating} <Star size={9} fill="#fff" />
-                      </div>
-                      <span style={{ fontSize: '11px', color: '#878787' }}>
-                        ({product.ratingCount.toLocaleString()})
-                      </span>
-                    </div>
+                        {product.brand || product.title.split(' ')[0]}
+                      </h3>
 
-                    {/* Price */}
-                    <div style={{ marginTop: 'auto' }}>
-                      <div style={{ display: 'flex', alignItems: 'baseline', gap: '6px', marginBottom: '2px' }}>
-                        <span style={{ fontSize: '16px', fontWeight: 600, color: '#212121' }}>
-                          ₹{product.price.toLocaleString('en-IN')}
-                        </span>
-                        <span style={{ fontSize: '12px', color: '#878787', textDecoration: 'line-through' }}>
-                          ₹{product.originalPrice.toLocaleString('en-IN')}
+                      {/* Product Name */}
+                      <p style={{
+                        fontSize: '12px', color: '#878787', marginBottom: '8px',
+                        display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical',
+                        overflow: 'hidden', minHeight: '32px', lineHeight: '16px',
+                      }}>
+                        {product.title}
+                      </p>
+
+                      {/* Rating */}
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '4px', marginBottom: '8px' }}>
+                        <div style={{
+                          backgroundColor: '#388e3c', color: '#fff', padding: '2px 6px',
+                          borderRadius: '3px', fontSize: '11px', fontWeight: 600,
+                          display: 'inline-flex', alignItems: 'center', gap: '2px',
+                        }}>
+                          {product.rating} <Star size={9} fill="#fff" />
+                        </div>
+                        <span style={{ fontSize: '11px', color: '#878787' }}>
+                          ({product.ratingCount.toLocaleString()})
                         </span>
                       </div>
-                      <span style={{ fontSize: '12px', color: '#388e3c', fontWeight: 600 }}>
-                        {product.discount}% off
-                      </span>
+
+                      {/* Price */}
+                      <div style={{ marginTop: 'auto' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap', marginBottom: '2px' }}>
+                          <span style={{ fontSize: '16px', fontWeight: 600, color: '#212121' }}>
+                            ₹{product.price.toLocaleString('en-IN')}
+                          </span>
+                          {/* F-Assured badge */}
+                          <span style={{
+                            display: 'inline-flex', alignItems: 'center', gap: '2px',
+                            border: '1px solid #47c9a2', borderRadius: '10px',
+                            padding: '1px 5px 1px 2px', flexShrink: 0,
+                          }}>
+                            <span style={{
+                              width: '14px', height: '14px', borderRadius: '50%',
+                              backgroundColor: '#2874f0',
+                              display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                              flexShrink: 0,
+                            }}>
+                              <span style={{ color: '#fff', fontSize: '8px', fontWeight: 900, fontStyle: 'italic' }}>F</span>
+                            </span>
+                            <span style={{ color: '#47c9a2', fontSize: '9px', fontWeight: 700 }}>Assured</span>
+                          </span>
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '2px' }}>
+                          <span style={{ fontSize: '12px', color: '#878787', textDecoration: 'line-through' }}>
+                            ₹{product.originalPrice.toLocaleString('en-IN')}
+                          </span>
+                          <span style={{ fontSize: '12px', color: '#388e3c', fontWeight: 600 }}>
+                            {product.discount}% off
+                          </span>
+                        </div>
+                      </div>
                     </div>
                   </div>
-                </div>
-              </Link>
-            ))}
+                </Link>
+              ))}
 
-            {sortedProducts.length === 0 && (
-              <div style={{
-                gridColumn: '1 / -1', backgroundColor: '#fff', padding: '60px 20px',
-                textAlign: 'center', borderRadius: '4px', boxShadow: '0 1px 2px rgba(0,0,0,0.08)',
-              }}>
-                <p style={{ fontSize: '18px', color: '#878787', marginBottom: '8px' }}>No products found</p>
-                <p style={{ fontSize: '14px', color: '#878787' }}>Try searching for something else</p>
-              </div>
-            )}
+              {sortedProducts.length === 0 && (
+                <div style={{
+                  gridColumn: '1 / -1', backgroundColor: '#fff', padding: '60px 20px',
+                  textAlign: 'center', borderRadius: '4px', boxShadow: '0 1px 2px rgba(0,0,0,0.08)',
+                }}>
+                  <p style={{ fontSize: '18px', color: '#878787', marginBottom: '8px' }}>No products found</p>
+                  <p style={{ fontSize: '14px', color: '#878787' }}>Try searching for something else</p>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>
-    </div>
     </>
   );
 }

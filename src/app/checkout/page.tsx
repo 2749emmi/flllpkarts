@@ -20,42 +20,22 @@ const states = [
 ];
 
 const paymentMethods = [
-  { 
-    id: 'phonepe', 
-    name: 'PhonePe', 
-    desc: 'Pay using PhonePe UPI', 
-    logo: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cGF0aCBkPSJNMTYgMkM4LjI2OCAyIDIgOC4yNjggMiAxNkMyIDIzLjczMiA4LjI2OCAzMCAxNiAzMEMyMy43MzIgMzAgMzAgMjMuNzMyIDMwIDE2QzMwIDguMjY4IDIzLjczMiAyIDE2IDJaIiBmaWxsPSJ3aGl0ZSIvPjxwYXRoIGQ9Ik0xNiA2QzEwLjQ3NyA2IDYgMTAuNDc3IDYgMTZDNiAyMS41MjMgMTAuNDc3IDI2IDE2IDI2QzIxLjUyMyAyNiAyNiAyMS41MjMgMjYgMTZDMjYgMTAuNDc3IDIxLjUyMyA2IDE2IDZaTTE4IDIwSDE0VjEySDE4VjIwWiIgZmlsbD0iIzVGMjU5RiIvPjwvc3ZnPg==',
-    disabled: false 
+  {
+    id: 'phonepe',
+    name: 'PhonePe',
+    desc: 'Pay using UPI',
+    logo: 'https://uxwing.com/wp-content/themes/uxwing/download/brands-and-social-media/phonepe-icon.png',
+    disabled: false
   },
-  { 
-    id: 'paytm', 
-    name: 'Paytm', 
-    desc: 'Pay using Paytm UPI', 
-    logo: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48Y2lyY2xlIGN4PSIxNiIgY3k9IjE2IiByPSIxNCIgZmlsbD0id2hpdGUiLz48cGF0aCBkPSJNMTYgNkMxMC40NzcgNiA2IDEwLjQ3NyA2IDE2QzYgMjEuNTIzIDEwLjQ3NyAyNiAxNiAyNkMyMS41MjMgMjYgMjYgMjEuNTIzIDI2IDE2QzI2IDEwLjQ3NyAyMS41MjMgNiAxNiA2Wk0xOCAyMEgxNFYxMkgxOFYyMFoiIGZpbGw9IiMwMEJBRjIiLz48L3N2Zz4=',
-    disabled: false 
-  },
-  { 
-    id: 'gpay', 
-    name: 'Google Pay', 
-    desc: 'Pay using Google Pay', 
-    logo: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48Y2lyY2xlIGN4PSIxNiIgY3k9IjE2IiByPSIxNCIgZmlsbD0id2hpdGUiLz48cGF0aCBkPSJNMTYgNkMxMC40NzcgNiA2IDEwLjQ3NyA2IDE2QzYgMjEuNTIzIDEwLjQ3NyAyNiAxNiAyNkMyMS41MjMgMjYgMjYgMjEuNTIzIDI2IDE2QzI2IDEwLjQ3NyAyMS41MjMgNiAxNiA2Wk0xOSAxOEgxM1YxNEgxOVYxOFoiIGZpbGw9IiM0Mjg1RjQiLz48L3N2Zz4=',
-    disabled: false 
-  },
-  { 
-    id: 'upi', 
-    name: 'UPI', 
-    desc: 'Open any UPI app on your phone', 
-    logo: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48Y2lyY2xlIGN4PSIxNiIgY3k9IjE2IiByPSIxNCIgZmlsbD0id2hpdGUiLz48cGF0aCBkPSJNMTYgNkMxMC40NzcgNiA2IDEwLjQ3NyA2IDE2QzYgMjEuNTIzIDEwLjQ3NyAyNiAxNiAyNkMyMS41MjMgMjYgMjYgMjEuNTIzIDI2IDE2QzI2IDEwLjQ3NyAyMS41MjMgNiAxNiA2Wk0xOSAxOEgxM1YxNEgxOVYxOFoiIGZpbGw9IiNGRjk5MzMiLz48L3N2Zz4=',
-    disabled: false 
-  },
-  { 
-    id: 'cod', 
-    name: 'Cash on Delivery', 
-    desc: 'Not available in your pincode', 
-    logo: null,
-    disabled: true 
+  {
+    id: 'paytm',
+    name: 'Paytm',
+    desc: 'Wallet / UPI payment',
+    logo: 'https://uxwing.com/wp-content/themes/uxwing/download/brands-and-social-media/paytm-icon.png',
+    disabled: false
   },
 ];
+
 
 const round1Ids = ['1001', '1002', '1003', '1004', '1005', '1006', '1007', '1008'];
 const round2Ids = ['2001', '2002', '2003', '2004'];
@@ -208,6 +188,9 @@ export default function CheckoutPage() {
   const [orderId, setOrderId] = useState('');
   const [savedDiscount, setSavedDiscount] = useState(0);
   const [lottiePreloaded, setLottiePreloaded] = useState(false);
+  // Hydration guard — prevents empty-cart flash while localStorage loads
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => { setMounted(true); }, []);
 
   // Load Razorpay script
   useEffect(() => {
@@ -215,7 +198,7 @@ export default function CheckoutPage() {
     script.src = 'https://checkout.razorpay.com/v1/checkout.js';
     script.async = true;
     document.body.appendChild(script);
-    
+
     return () => {
       document.body.removeChild(script);
     };
@@ -264,11 +247,11 @@ export default function CheckoutPage() {
 
   const handleFinalizeUpsellPurchase = useCallback(() => {
     if (!selectedUpsellItem) return;
-    
+
     // Initialize Razorpay payment for upsell
     if (typeof window !== 'undefined' && (window as any).Razorpay) {
       const { product, dealPrice } = selectedUpsellItem;
-      
+
       const options = {
         key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || 'rzp_live_3zT42YgMgCfOim',
         amount: dealPrice * 100, // Amount in paise
@@ -308,7 +291,7 @@ export default function CheckoutPage() {
           color: '#2874f0',
         },
         modal: {
-          ondismiss: function() {
+          ondismiss: function () {
             setProcessingUpsell(false);
           }
         }
@@ -319,13 +302,30 @@ export default function CheckoutPage() {
         alert('Payment failed. Please try again.');
         setProcessingUpsell(false);
       });
-      
+
       setProcessingUpsell(true);
       rzp.open();
     } else {
       alert('Payment gateway is loading. Please try again in a moment.');
     }
   }, [selectedUpsellItem, form.name, form.phone]);
+
+  /* ---- Hydration guard: show nothing until cart is loaded from localStorage ---- */
+  if (!mounted) {
+    return (
+      <div style={{
+        minHeight: '100vh', backgroundColor: '#fff',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+      }}>
+        <div style={{
+          width: '40px', height: '40px', borderRadius: '50%',
+          border: '3px solid #f0f0f0', borderTopColor: '#2874f0',
+          animation: 'spin 0.7s linear infinite',
+        }} />
+        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+      </div>
+    );
+  }
 
   /* ---- Empty cart guard ---- */
   if (items.length === 0 && step !== 'success' && step !== 'upsell_payment' && !processingUpsell) {
@@ -377,7 +377,7 @@ export default function CheckoutPage() {
 
   const handleConfirmOrder = () => {
     if (!selectedMethod) return;
-    
+
     // Initialize Razorpay payment
     if (typeof window !== 'undefined' && (window as any).Razorpay) {
       const options = {
@@ -412,7 +412,7 @@ export default function CheckoutPage() {
           color: '#2874f0',
         },
         modal: {
-          ondismiss: function() {
+          ondismiss: function () {
             setProcessing(false);
           }
         }
@@ -423,7 +423,7 @@ export default function CheckoutPage() {
         alert('Payment failed. Please try again.');
         setProcessing(false);
       });
-      
+
       setProcessing(true);
       rzp.open();
     } else {
@@ -820,11 +820,9 @@ export default function CheckoutPage() {
               </div>
 
               {/* Flipkart Assured */}
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '10px' }}>
-                <span style={{ fontSize: '12px', color: '#2874f0', fontWeight: 600 }}>
-                  Flipkart Assured
-                </span>
-                <CheckCircle size={16} color="#388e3c" />
+              <div style={{ display: 'flex', alignItems: 'center', marginTop: '10px' }}>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src="https://static-assets-web.flixcart.com/fk-p-linchpin-web/fk-cp-zion/img/fa_62673a.png" alt="Flipkart Assured" style={{ height: '16px', width: 'auto' }} />
               </div>
 
               {/* Delivery */}
@@ -942,85 +940,89 @@ export default function CheckoutPage() {
           </div>
 
           {/* Select Payment Method */}
-          <div style={{ backgroundColor: '#fff', marginTop: '8px' }}>
-            <div style={{ padding: '16px 16px 12px', borderBottom: '1px solid #f0f0f0' }}>
-              <h3 style={{ fontSize: '15px', fontWeight: 700, color: '#212121', margin: 0 }}>Select Payment Method</h3>
+          <div style={{ backgroundColor: '#fff', marginTop: '8px', paddingBottom: '16px' }}>
+            <div style={{ padding: '16px', marginBottom: '8px' }}>
+              <h3 style={{ fontSize: '16px', fontWeight: 700, color: '#000', margin: 0 }}>Choose Payment Method</h3>
+
+              {/* Added 80% Discount Banner */}
+              <div style={{
+                marginTop: '16px',
+                backgroundColor: '#fff06b',
+                borderRadius: '8px',
+                padding: '16px',
+                textAlign: 'center',
+                border: '2px dashed #4caf50',
+                position: 'relative'
+              }}>
+                <span style={{ fontSize: '14px', fontWeight: 600, color: '#212121' }}>
+                  Get up to <span style={{ fontWeight: 800 }}>80% Discount</span> on<br />All UPI Payments
+                </span>
+                <span style={{ position: 'absolute', left: '-10px', top: '50%', transform: 'translateY(-50%)', fontSize: '24px' }}>🧨</span>
+                <span style={{ position: 'absolute', right: '-10px', top: '50%', transform: 'translateY(-50%)', fontSize: '24px' }}>🧨</span>
+              </div>
             </div>
 
             {/* Payment options */}
-            {paymentMethods.map(pm => {
-              return (
-                <div key={pm.id}
-                  onClick={() => !pm.disabled && setSelectedMethod(pm.id)}
-                  style={{
-                    padding: '14px 16px', borderBottom: '1px solid #f0f0f0',
-                    cursor: pm.disabled ? 'not-allowed' : 'pointer',
-                    backgroundColor: selectedMethod === pm.id ? '#f5faff' : '#fff',
-                    display: 'flex', alignItems: 'center', gap: '12px',
-                    opacity: pm.disabled ? 0.6 : 1,
-                  }}
-                >
-                  {/* Radio */}
-                  <div style={{
-                    width: '20px', height: '20px', borderRadius: '50%',
-                    border: pm.disabled ? '2px solid #e0e0e0' : selectedMethod === pm.id ? '6px solid #2874f0' : '2px solid #c2c2c2',
-                    boxSizing: 'border-box', flexShrink: 0,
-                  }} />
+            <div style={{ padding: '0 16px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              {paymentMethods.map(pm => {
+                return (
+                  <div key={pm.id}
+                    onClick={() => !pm.disabled && setSelectedMethod(pm.id)}
+                    style={{
+                      padding: '14px 16px', border: selectedMethod === pm.id ? '2px solid #2874f0' : '1px solid #f0f0f0',
+                      borderRadius: '12px',
+                      cursor: pm.disabled ? 'not-allowed' : 'pointer',
+                      backgroundColor: selectedMethod === pm.id ? '#f5faff' : '#fcfcfc',
+                      display: 'flex', alignItems: 'center', gap: '16px',
+                      opacity: pm.disabled ? 0.6 : 1,
+                      boxShadow: '0 1px 3px rgba(0,0,0,0.05)'
+                    }}
+                  >
+                    {/* Logo/Icon */}
+                    <div style={{
+                      width: '40px', height: '40px', borderRadius: '8px',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+                      overflow: 'hidden',
+                      backgroundColor: pm.id === 'phonepe' ? '#5F259F' : '#fff',
+                      border: pm.id !== 'phonepe' ? '1px solid #f0f0f0' : 'none'
+                    }}>
+                      {pm.logo ? (
+                        <img
+                          src={pm.logo}
+                          alt={pm.name}
+                          style={{ width: '80%', height: '80%', objectFit: 'contain' }}
+                        />
+                      ) : (
+                        <Banknote size={24} color={pm.disabled ? '#bababa' : '#fb641b'} />
+                      )}
+                    </div>
 
-                  {/* Logo/Icon */}
-                  <div style={{
-                    width: '36px', height: '36px', borderRadius: '6px',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-                    overflow: 'hidden',
-                    backgroundColor: pm.id === 'phonepe' ? '#5F259F' : 
-                                   pm.id === 'paytm' ? '#00BAF2' : 
-                                   pm.id === 'gpay' ? '#4285F4' : 
-                                   pm.id === 'upi' ? '#FF9933' : '#f5f5f5',
-                  }}>
-                    {pm.logo ? (
-                      <img 
-                        src={pm.logo} 
-                        alt={pm.name}
-                        style={{ 
-                          width: '100%', 
-                          height: '100%',
-                          objectFit: 'contain' 
-                        }}
-                        onError={(e) => {
-                          // Show first letter if image fails
-                          const target = e.currentTarget;
-                          target.style.display = 'none';
-                          const parent = target.parentElement;
-                          if (parent) {
-                            parent.innerHTML = `<span style="color: white; font-weight: 700; font-size: 16px;">${pm.name.charAt(0)}</span>`;
-                          }
-                        }}
-                      />
-                    ) : (
-                      <Banknote size={20} color={pm.disabled ? '#bababa' : '#2874f0'} />
+                    {/* Text */}
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <p style={{
+                        fontSize: '15px', fontWeight: 700, margin: 0,
+                        color: pm.disabled ? '#bababa' : '#212121',
+                      }}>{pm.name}</p>
+                      <p style={{
+                        fontSize: '13px', margin: '2px 0 0', fontWeight: 600,
+                        color: pm.disabled ? '#ff4444' : '#69748c',
+                        fontStyle: pm.disabled ? 'italic' : 'normal',
+                      }}>{pm.desc}</p>
+                    </div>
+
+                    {/* Chevron light blue background circle like screenshot */}
+                    {!pm.disabled && (
+                      <div style={{
+                        width: '28px', height: '28px', borderRadius: '50%', backgroundColor: '#f0f5ff',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center'
+                      }}>
+                        <ChevronRight size={16} color="#2874f0" />
+                      </div>
                     )}
                   </div>
-
-                  {/* Text */}
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <p style={{
-                      fontSize: '14px', fontWeight: 500, margin: 0,
-                      color: pm.disabled ? '#bababa' : '#212121',
-                    }}>{pm.name}</p>
-                    <p style={{
-                      fontSize: '12px', margin: '2px 0 0',
-                      color: pm.disabled ? '#ff4444' : '#878787',
-                      fontStyle: pm.disabled ? 'italic' : 'normal',
-                  }}>{pm.desc}</p>
-                </div>
-
-                {/* Chevron */}
-                {!pm.disabled && (
-                  <ChevronRight size={16} color="#c2c2c2" />
-                )}
-              </div>
-            );
-            })}
+                );
+              })}
+            </div>
           </div>
 
           {/* Trust Badge */}
@@ -1038,20 +1040,32 @@ export default function CheckoutPage() {
             backgroundColor: '#fff', borderTop: '1px solid #e0e0e0',
             padding: '12px 16px', zIndex: 50,
             boxShadow: '0 -2px 8px rgba(0,0,0,0.08)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
           }}>
+            <div style={{ display: 'flex', flexDirection: 'column' }}>
+              <span style={{ fontSize: '14px', color: '#878787', textDecoration: 'line-through' }}>
+                ₹{(totalPrice + totalDiscount).toLocaleString('en-IN')}
+              </span>
+              <span style={{ fontSize: '18px', fontWeight: 800, color: '#212121' }}>
+                ₹{totalPrice.toLocaleString('en-IN')}
+              </span>
+            </div>
+
             <button disabled={!selectedMethod || processing}
               onClick={handleConfirmOrder}
               style={{
-                width: '100%',
-                backgroundColor: (!selectedMethod || processing) ? '#e0e0e0' : '#ffc800',
-                color: (!selectedMethod || processing) ? '#878787' : '#212121',
-                border: 'none', padding: '14px', fontWeight: 700, borderRadius: '24px',
+                width: '60%',
+                backgroundColor: (!selectedMethod || processing) ? '#e0e0e0' : '#fb641b',
+                color: (!selectedMethod || processing) ? '#878787' : '#fff',
+                border: 'none', padding: '14px', fontWeight: 700, borderRadius: '8px',
                 cursor: (!selectedMethod || processing) ? 'not-allowed' : 'pointer',
-                textTransform: 'uppercase', fontSize: '15px', fontFamily: 'inherit',
-                letterSpacing: '0.5px',
+                fontSize: '15px', fontFamily: 'inherit',
+                boxShadow: (!selectedMethod || processing) ? 'none' : '0 2px 4px rgba(251,100,27,0.3)',
               }}
             >
-              {processing ? 'Processing...' : `PAY ₹${totalPrice.toLocaleString('en-IN')}`}
+              {processing ? 'Processing...' : `Order Now`}
             </button>
           </div>
         </div>

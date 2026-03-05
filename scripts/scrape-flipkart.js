@@ -42,15 +42,128 @@ async function scrapeProduct(url) {
   try {
     console.log(`  Fetching HTML for: ${url}`);
 
+    // Add timeout to fetch
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
+
     const response = await fetch(url, {
+      signal: controller.signal,
       headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
         'Accept-Language': 'en-US,en;q=0.9',
+        'Accept-Encoding': 'gzip, deflate, br',
+        'Cache-Control': 'max-age=0',
+        'Sec-Ch-Ua': '"Google Chrome";v="131", "Chromium";v="131", "Not_A Brand";v="24"',
+        'Sec-Ch-Ua-Mobile': '?0',
+        'Sec-Ch-Ua-Platform': '"Windows"',
+        'Sec-Fetch-Dest': 'document',
+        'Sec-Fetch-Mode': 'navigate',
+        'Sec-Fetch-Site': 'none',
+        'Sec-Fetch-User': '?1',
+        'Upgrade-Insecure-Requests': '1',
+        'Referer': 'https://www.flipkart.com/',
       }
-    });
+    }).finally(() => clearTimeout(timeoutId));
 
     if (!response.ok) {
+      // Flipkart sometimes blocks requests - try with minimal URL
+      if (response.status === 500 || response.status === 403) {
+        console.log(`  Got ${response.status}, retrying with clean URL...`);
+        await delay(2000);
+        
+        const minimalUrl = url.split('?')[0];
+        const retryController = new AbortController();
+        const retryTimeoutId = setTimeout(() => retryController.abort(), 15000);
+        
+        const retryResponse = await fetch(minimalUrl, {
+          signal: retryController.signal,
+          headers: {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
+            'Accept': 'text/html',
+            'Accept-Language': 'en-US,en;q=0.9',
+          }
+        }).finally(() => clearTimeout(retryTimeoutId));
+        
+        if (!retryResponse.ok) {
+          throw new Error(`HTTP ${retryResponse.status}. Flipkart blocked the request. Try: 1) Wait a few minutes 2) Use Manual Entry 3) Copy product details manually`);
+        }
+        
+        const html = await retryResponse.text();
+        const $ = cheerio.load(html);
+        
+        // Continue with normal processing...
+        const productImages = [];
+        const seenImages = new Set();
+        $('img').each((i, el) => {
+          let src = $(el).attr('src') || $(el).attr('data-url') || '';
+          if (src.includes('rukminim') && src.includes('/image/')) {
+            const highRes = src.replace(/\/image\/\d+\/\d+\//, '/image/832/832/');
+            const key = highRes.replace(/\?.*$/, '');
+            if (!seenImages.has(key) && !src.includes('/promos/') && !src.includes('/cms-') && !src.includes('/fk-p-') && !src.includes('/blobio/') && !src.includes('/www/')) {
+              seenImages.add(key);
+              productImages.push(highRes);
+            }
+          }
+        });
+        
+        $('br').replaceWith('\n');
+        $('script, style, noscript, svg, header, footer, nav, iframe').remove();
+        $('div, p, h1, h2, h3, h4, h5, h6, li, tr').prepend('\n');
+        const fullText = $('body').text().replace(/\n+/g, '\n');
+        
+        const data = parsePageText(fullText, productImages);
+        
+        const domSpecs = {};
+        $('table tr').each((i, row) => {
+          const cells = $(row).find('td');
+          if (cells.length >= 2) {
+            const key = $(cells[0]).text().trim();
+            const val = $(cells[cells.length - 1]).text().trim();
+            if (key.length > 2 && key.length < 60 && val.length > 0 && val.length < 300) {
+              domSpecs[key] = val;
+            }
+          }
+        });
+        
+        if (Object.keys(domSpecs).length > 0) {
+          data.specs = { ...data.specs, ...domSpecs };
+        }
+        
+        const domVariants = [];
+        $('.InyRmc, .\\_3Z5yFS').each((i, container) => {
+          const type = $(container).find('.\\_25b18c, .\\_2fIbwP').text().trim();
+          if (!type) return;
+          
+          const options = [];
+          $(container).find('li').each((j, li) => {
+            const title = $(li).attr('title') || $(li).text().trim() || $(li).find('a').text().trim() || $(li).find('.\\_4zdo').text().trim();
+            const a = $(li).find('a').first();
+            const optionUrl = a.length ? 'https://www.flipkart.com' + a.attr('href') : '';
+            const isCurrent = $(li).hasClass('RcXBOT') || $(li).hasClass('\\_3V2w15');
+            
+            let imgUrl = $(li).find('img').attr('src') || '';
+            if (imgUrl && imgUrl.includes('/image/')) {
+              imgUrl = imgUrl.replace(/\/image\/\d+\/\d+\//, '/image/128/128/');
+            }
+            
+            if (title && title.length > 1) {
+              options.push({ name: title, url: optionUrl, isCurrent: !!isCurrent, image: imgUrl });
+            }
+          });
+          
+          if (options.length > 0) {
+            domVariants.push({ type, options });
+          }
+        });
+        
+        if (domVariants.length > 0) {
+          data.variants = domVariants;
+        }
+        
+        return { ...data, sourceUrl: minimalUrl, scrapedAt: new Date().toISOString() };
+      }
+      
       throw new Error(`HTTP error! status: ${response.status}`);
     }
 
@@ -131,6 +244,9 @@ async function scrapeProduct(url) {
 
     return { ...data, sourceUrl: url, scrapedAt: new Date().toISOString() };
   } catch (err) {
+    if (err.name === 'AbortError') {
+      throw new Error('Request timed out. Flipkart may be blocking automated requests. Please use Manual Entry instead.');
+    }
     throw err;
   }
 }
